@@ -8,7 +8,6 @@ import { Resend } from 'resend';
 
 const DB_FILE = path.join(process.cwd(), 'failed_items.json');
 const KV_KEY = 'failed_items';
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function saveFailedItem(item: { requester: string; name: string; quantity: string; price?: string }) {
     const newItem = {
@@ -20,6 +19,7 @@ export async function saveFailedItem(item: { requester: string; name: string; qu
     // Send Email Notification (Fire and Forget)
     if (process.env.RESEND_API_KEY && process.env.NOTIFICATION_EMAIL) {
         try {
+            const resend = new Resend(process.env.RESEND_API_KEY);
             await resend.emails.send({
                 from: 'onboarding@resend.dev',
                 to: process.env.NOTIFICATION_EMAIL,

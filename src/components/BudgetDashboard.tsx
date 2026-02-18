@@ -57,14 +57,19 @@ export default function BudgetDashboard() {
         if (!newItem.name || !newItem.requester) return;
 
         setIsSending(true);
-        const result = await saveFailedItem(newItem);
-        if (result.success) {
-            setMissingItems(prev => [...prev, result.item]);
-            setNewItem({ name: '', quantity: '', price: '', requester: '' });
-            setAddedSuccess(true);
-            setTimeout(() => setAddedSuccess(false), 3000);
+        try {
+            const result = await saveFailedItem(newItem);
+            if (result.success) {
+                setMissingItems(prev => [...prev, result.item]);
+                setNewItem({ name: '', quantity: '', price: '', requester: '' });
+                setAddedSuccess(true);
+                setTimeout(() => setAddedSuccess(false), 3000);
+            }
+        } catch (error) {
+            console.error("Error adding item:", error);
+        } finally {
+            setIsSending(false);
         }
-        setIsSending(false);
     };
 
     const handleSendWhatsApp = () => {
