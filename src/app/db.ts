@@ -4,8 +4,11 @@ import fs from 'fs';
 import path from 'path';
 import { kv } from '@vercel/kv';
 
+import { Resend } from 'resend';
+
 const DB_FILE = path.join(process.cwd(), 'failed_items.json');
 const KV_KEY = 'failed_items';
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function saveFailedItem(item: { requester: string; name: string; quantity: string; price?: string }) {
     const newItem = {
@@ -13,6 +16,29 @@ export async function saveFailedItem(item: { requester: string; name: string; qu
         ...item,
         timestamp: new Date().toISOString()
     };
+
+    // Send Email Notification (Fire and Forget)
+    if (process.env.RESEND_API_KEY && process.env.NOTIFICATION_EMAIL) {
+        try {
+            await resend.emails.send({
+                from: 'onboarding@resend.dev',
+                to: process.env.NOTIFICATION_EMAIL,
+                subject: `🚨 Faltante: ${item.name}`,
+                html: `
+                    <h1>Nuevo Item Faltante Reportado</h1>
+                    <p><strong>Producto:</strong> ${item.name}</p>
+                    <p><strong>Cantidad:</strong> ${item.quantity}</p>
+                    <p><strong>Solicitado por:</strong> ${item.requester}</p>
+                    ${item.price ? `<p><strong>Precio Ref:</strong> S/ ${item.price}</p>` : ''}
+                    <hr>
+                    <p><small>Enviado desde Presupuesto Mix</small></p>
+                `
+            });
+            console.log("Notificación enviada a", process.env.NOTIFICATION_EMAIL);
+        } catch (error) {
+            console.error("Error enviando correo:", error);
+        }
+    }
 
     if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
         // PRODUCTION: Use Vercel KV (Redis)
