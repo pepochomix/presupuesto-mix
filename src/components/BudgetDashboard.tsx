@@ -46,6 +46,7 @@ export default function BudgetDashboard() {
     const [missingItems, setMissingItems] = useState<any[]>([]);
     const [newItem, setNewItem] = useState({ name: '', quantity: '', price: '', requester: '' });
     const [isSending, setIsSending] = useState(false);
+    const [addedSuccess, setAddedSuccess] = useState(false);
 
     // Load initial missing items on mount
     useEffect(() => {
@@ -60,6 +61,8 @@ export default function BudgetDashboard() {
         if (result.success) {
             setMissingItems(prev => [...prev, result.item]);
             setNewItem({ name: '', quantity: '', price: '', requester: '' });
+            setAddedSuccess(true);
+            setTimeout(() => setAddedSuccess(false), 3000);
         }
         setIsSending(false);
     };
@@ -80,8 +83,9 @@ export default function BudgetDashboard() {
         message += `_Enviado desde Presupuesto Mix_`;
 
         const encodedMessage = encodeURIComponent(message);
-        // Using the provided number for the group admin or direct link
-        window.open(`https://wa.me/51988945307?text=${encodedMessage}`, '_blank');
+        // Using api.whatsapp.com for better compatibility across devices
+        const url = `https://api.whatsapp.com/send?phone=51988945307&text=${encodedMessage}`;
+        window.open(url, '_blank', 'noopener,noreferrer');
     };
     const [expandedDish, setExpandedDish] = useState<string | null>("dish-1");
     const [hasFetchedAI, setHasFetchedAI] = useState(false);
@@ -509,6 +513,19 @@ export default function BudgetDashboard() {
                                             {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                                             Agregar a la Lista
                                         </button>
+
+                                        <AnimatePresence>
+                                            {addedSuccess && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: -10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0 }}
+                                                    className="bg-emerald-500/20 text-emerald-400 text-center text-sm font-bold py-2 rounded-lg border border-emerald-500/30"
+                                                >
+                                                    ¡Item agregado correctamente!
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 </div>
 
@@ -533,7 +550,8 @@ export default function BudgetDashboard() {
                                                     </div>
                                                     <div className="mt-3 pt-3 border-t border-slate-800/50 flex justify-between items-center text-xs">
                                                         <span className="text-slate-500 flex items-center gap-1">
-                                                            <User className="w-3 h-3" /> {item.requester}
+                                                            <User className="w-3 h-3 text-amber-500" />
+                                                            <span className="text-amber-500 font-bold">{item.requester}</span>
                                                         </span>
                                                         <span className="text-slate-600">{new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                     </div>
@@ -806,8 +824,8 @@ function IngredientRow({
 
     return (
         <div className={`grid grid-cols-12 items-center p-3 rounded-lg text-sm gap-2 transition-colors duration-300 ${isCheaper ? 'bg-emerald-900/10 border border-emerald-500/20' : hasDiscount ? 'bg-red-900/10 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'hover:bg-slate-800/30 group'}`}>
-            <div className="col-span-4 pr-2">
-                <p className={`font-medium ${hasDiscount ? 'text-red-400' : 'text-slate-300'}`}>{ingredient.name}</p>
+            <div className="col-span-5 pr-2">
+                <p className={`font-medium break-words ${hasDiscount ? 'text-red-400' : 'text-slate-300'}`}>{ingredient.name}</p>
                 {isCheaper && !hasDiscount && (
                     <div className="flex items-center gap-1 mt-1 text-xs text-emerald-400">
                         <ArrowRight className="w-3 h-3" />
@@ -838,14 +856,14 @@ function IngredientRow({
 
             {/* Editable Quantity */}
             <div className="col-span-3 flex justify-center">
-                <div className="flex items-center gap-1 bg-slate-950/50 rounded-md px-2 py-1 border border-slate-800 focus-within:border-amber-500 transition-colors">
+                <div className="flex items-center gap-1 bg-slate-950/50 rounded-md px-2 py-1 border border-slate-800 focus-within:border-amber-500 transition-colors w-full max-w-[100px]">
                     <input
                         type="number"
-                        className="w-12 bg-transparent text-center outline-none text-slate-300"
+                        className="w-full bg-transparent text-center outline-none text-slate-300 min-w-0"
                         value={ingredient.quantity}
                         onChange={(e) => onUpdate('quantity', parseFloat(e.target.value) || 0)}
                     />
-                    <span className="text-xs text-slate-500 truncate max-w-[40px]">{ingredient.unit}</span>
+                    <span className="text-xs text-slate-500 truncate shrink-0">{ingredient.unit}</span>
                 </div>
             </div>
 
@@ -908,17 +926,17 @@ function BudgetTicker({ data }: { data: Dish[] }) {
                     <motion.div
                         className="flex items-center gap-12 pl-4"
                         animate={{ x: ["0%", "-50%"] }}
-                        transition={{ repeat: Infinity, ease: "linear", duration: 40 }}
+                        transition={{ repeat: Infinity, ease: "linear", duration: 20 }}
                     >
                         {tickerItems.map((dish, i) => {
                             const total = dish.ingredients.reduce((acc, item) => acc + item.priceTotal, 0);
                             return (
-                                <div key={`${dish.id}-${i}`} className="flex items-center gap-3 group">
-                                    <Store className="w-4 h-4 text-slate-500 group-hover:text-amber-500 transition-colors" />
-                                    <span className="text-slate-300 font-bold uppercase tracking-wide text-sm whitespace-nowrap">
+                                <div key={`${dish.id}-${i}`} className="flex items-center gap-4 group cursor-pointer hover:scale-110 transition-transform">
+                                    <Store className="w-6 h-6 text-slate-500 group-hover:text-amber-500 transition-colors" />
+                                    <span className="text-slate-200 font-bold uppercase tracking-wide text-lg whitespace-nowrap drop-shadow-md">
                                         {dish.name}
                                     </span>
-                                    <span className="bg-slate-800 text-amber-500 px-2 py-0.5 rounded flex items-center gap-1 font-mono text-sm border border-slate-700 group-hover:border-amber-500/50 transition-colors shadow-lg shadow-black/50">
+                                    <span className="bg-slate-800 text-amber-500 px-3 py-1 rounded-lg flex items-center gap-1 font-mono text-lg font-bold border border-slate-700 group-hover:border-amber-500/50 transition-colors shadow-lg shadow-black/50">
                                         S/ {total.toFixed(2)}
                                     </span>
                                 </div>
