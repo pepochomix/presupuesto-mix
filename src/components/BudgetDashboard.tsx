@@ -225,9 +225,10 @@ export default function BudgetDashboard() {
                     <div className="max-w-7xl mx-auto px-4 py-8">
 
                         {/* Header */}
-                        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-                            <div className="flex items-center gap-6">
-                                <div className="relative w-32 h-24 rounded-xl overflow-hidden shadow-2xl border-2 border-amber-500/20 group">
+                        {/* Header */}
+                        <header className="flex flex-col md:flex-row justify-between items-center mb-8 md:mb-10 gap-6 md:gap-4">
+                            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
+                                <div className="relative w-28 h-20 md:w-32 md:h-24 rounded-xl overflow-hidden shadow-2xl border-2 border-amber-500/20 group shrink-0">
                                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent z-10"></div>
                                     <img
                                         src="/Ajo Professional_food_photography_2k_20260218142.jpeg"
@@ -236,24 +237,24 @@ export default function BudgetDashboard() {
                                     />
                                 </div>
                                 <div>
-                                    <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-400 to-orange-600 bg-clip-text text-transparent flex items-center gap-3">
-                                        <Calculator className="w-8 h-8 text-amber-500" />
-                                        Presupuesto Mix Editable
+                                    <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-amber-400 to-orange-600 bg-clip-text text-transparent flex flex-col md:flex-row items-center gap-2 md:gap-3">
+                                        <Calculator className="w-6 h-6 md:w-8 md:h-8 text-amber-500" />
+                                        <span>Presupuesto Mix Editable</span>
                                     </h1>
-                                    <p className="text-slate-400 mt-2 text-lg">Dashboard Dinámico & Comparativa IA</p>
+                                    <p className="text-slate-400 mt-1 md:mt-2 text-sm md:text-lg">Dashboard Dinámico & Comparativa IA</p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-4">
+                            <div className="flex flex-wrap justify-center items-center gap-4 w-full md:w-auto">
                                 {/* People Count Edit */}
-                                <div className="bg-slate-900 border border-slate-700 rounded-full px-5 py-2 flex items-center gap-3 shadow-lg">
-                                    <Users className="w-5 h-5 text-purple-400" />
-                                    <span className="text-sm text-slate-400 font-medium">Personas:</span>
+                                <div className="bg-slate-900 border border-slate-700 rounded-full px-4 py-2 flex items-center gap-2 shadow-lg">
+                                    <Users className="w-4 h-4 text-purple-400" />
+                                    <span className="text-xs text-slate-400 font-medium">Personas:</span>
                                     <input
                                         type="number"
                                         value={peopleCount}
                                         onChange={(e) => setPeopleCount(Math.max(1, parseInt(e.target.value) || 0))}
-                                        className="w-16 bg-transparent text-xl font-bold text-slate-100 outline-none text-center focus:text-purple-400 transition-colors"
+                                        className="w-12 bg-transparent text-lg font-bold text-slate-100 outline-none text-center focus:text-purple-400 transition-colors"
                                     />
                                 </div>
 
@@ -261,7 +262,7 @@ export default function BudgetDashboard() {
                                     onClick={toggleOptimization}
                                     disabled={isLoading}
                                     className={`
-                                relative overflow-hidden px-8 py-3 rounded-full font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl
+                                relative overflow-hidden px-6 py-2 md:px-8 md:py-3 rounded-full font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl text-sm md:text-base
                                 ${isOptimized
                                             ? 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700'
                                             : 'bg-gradient-to-r from-amber-500 to-orange-600 text-slate-900 hover:shadow-orange-500/25'
@@ -271,17 +272,17 @@ export default function BudgetDashboard() {
                                     <span className="relative z-10 flex items-center gap-2">
                                         {isLoading ? (
                                             <>
-                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
                                                 <span>Analizando...</span>
                                             </>
                                         ) : isOptimized ? (
                                             <>
-                                                <ArrowLeft className="w-5 h-5" />
+                                                <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
                                                 <span>Volver a Estándar</span>
                                             </>
                                         ) : (
                                             <>
-                                                <Sparkles className="w-5 h-5" />
+                                                <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
                                                 <span>Optimizar con IA</span>
                                             </>
                                         )}
@@ -961,15 +962,16 @@ function IntroScreen() {
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.5, duration: 0.8 }}
-                    className="text-center"
+                    className="text-center px-4"
                 >
-                    <div className="flex items-center justify-center gap-3 mb-2">
-                        <Sparkles className="w-8 h-8 text-amber-500 animate-pulse" />
-                        <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-white drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-3 mb-2">
+                        <Sparkles className="w-8 h-8 text-amber-500 animate-pulse hidden md:block" />
+                        <h1 className="text-3xl md:text-6xl font-black tracking-tighter text-white drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">
                             PRESUPUESTO <span className="text-amber-500">MIX</span>
                         </h1>
+                        <Sparkles className="w-6 h-6 text-amber-500 animate-pulse md:hidden" />
                     </div>
-                    <p className="text-slate-400 tracking-[0.5em] text-sm uppercase">Edición de Lujo</p>
+                    <p className="text-slate-400 tracking-[0.3em] md:tracking-[0.5em] text-xs md:text-sm uppercase">Edición de Lujo</p>
                 </motion.div>
 
                 {/* "Generando Presupuesto" Text */}
@@ -979,11 +981,11 @@ function IntroScreen() {
                     transition={{ delay: 1.2, duration: 0.5 }}
                     className="flex flex-col items-center gap-4"
                 >
-                    <div className="h-[1px] w-24 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50"></div>
-                    <span className="text-xl md:text-2xl font-light text-slate-200 tracking-widest animate-pulse">
+                    <div className="h-[1px] w-16 md:w-24 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50"></div>
+                    <span className="text-lg md:text-2xl font-light text-slate-200 tracking-widest animate-pulse text-center px-4">
                         GENERANDO PRESUPUESTO...
                     </span>
-                    <div className="h-[1px] w-24 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50"></div>
+                    <div className="h-[1px] w-16 md:w-24 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50"></div>
                 </motion.div>
 
                 {/* Loading Bar */}
