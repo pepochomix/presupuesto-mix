@@ -50,23 +50,45 @@ export default function BudgetDashboard() {
 
     // Load initial missing items on mount
     useEffect(() => {
-        getFailedItems().then(items => setMissingItems(items));
+        const localItems = JSON.parse(localStorage.getItem('missingItems') || '[]');
+        setMissingItems(localItems);
+
+        getFailedItems().then(serverItems => {
+            // Merge server items with local items, avoiding duplicates by ID
+            const combined = [...localItems];
+            serverItems.forEach((sItem: any) => {
+                if (!combined.find(lItem => lItem.id === sItem.id)) {
+                    combined.push(sItem);
+                }
+            });
+            setMissingItems(combined);
+        });
     }, []);
 
     const handleAddItem = async () => {
         if (!newItem.name || !newItem.requester) return;
 
         setIsSending(true);
+
+        // Optimistic UI Update & Local Storage
+        const tempItem = {
+            id: Date.now().toString(),
+            ...newItem,
+            timestamp: new Date().toISOString()
+        };
+
+        const updatedItems = [...missingItems, tempItem];
+        setMissingItems(updatedItems);
+        localStorage.setItem('missingItems', JSON.stringify(updatedItems));
+
+        setNewItem({ name: '', quantity: '', price: '', requester: '' });
+        setAddedSuccess(true);
+        setTimeout(() => setAddedSuccess(false), 3000);
+
         try {
-            const result = await saveFailedItem(newItem);
-            if (result.success) {
-                setMissingItems(prev => [...prev, result.item]);
-                setNewItem({ name: '', quantity: '', price: '', requester: '' });
-                setAddedSuccess(true);
-                setTimeout(() => setAddedSuccess(false), 3000);
-            }
+            await saveFailedItem(newItem);
         } catch (error) {
-            console.error("Error adding item:", error);
+            console.error("Error syncing to server:", error);
         } finally {
             setIsSending(false);
         }
