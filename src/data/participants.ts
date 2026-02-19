@@ -24,4 +24,6 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
     { id: '14', name: 'Gaby la Patrona', type: 'Adulto', isActive: true },
     { id: '15', name: 'Momo', type: 'Adulto', isActive: true },
     { id: '16', name: 'Chana', type: 'Adulto', isActive: true },
+    { id: '17', name: 'Valentina', type: 'Niño', isActive: true },
+    { id: '18', name: 'Francesca', type: 'Niño', isActive: true },
 ];
