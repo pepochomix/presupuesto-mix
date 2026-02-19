@@ -28,7 +28,7 @@ import {
 import { optimizeBudgetWithAI } from "@/app/actions";
 import { motion, AnimatePresence } from "framer-motion";
 
-const INITIAL_PEOPLE_COUNT = 12;
+const INITIAL_PEOPLE_COUNT = 10;
 
 export default function BudgetDashboard() {
     const [currentData, setCurrentData] = useState<Dish[]>(budgetData);
