@@ -66,7 +66,7 @@ export const budgetData: Dish[] = [
     },
     {
         id: "dish-3",
-        name: "Camote al Horno",
+        name: "Insumos Necesarios",
         image: "https://images.unsplash.com/photo-1541592106381-b31e9674c96b?q=80&w=600&auto=format&fit=crop", // Ajo Professional / Kitchen Vibe
         ingredients: [
             { id: "i3-1", name: "Camote Amarillo", quantity: 3, unit: "Kilos", priceUnit: 3.50, priceTotal: 10.50, observations: "Viernes 20% descuento", marketPrices: generateMarketPrices(3.50) },
