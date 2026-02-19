@@ -32,7 +32,7 @@ import {
     AlertTriangle,
     Leaf
 } from "lucide-react";
-import { saveFailedItem, getFailedItems, clearFailedItems } from "@/app/db";
+import { saveFailedItem, getFailedItems, clearFailedItems, saveCowFunds, getCowFunds, clearCowFundsData } from "@/app/db";
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
     AreaChart, Area, CartesianGrid, Legend, ComposedChart, Line
@@ -77,7 +77,9 @@ export default function BudgetDashboard() {
             status: 'active',
             contributors: []
         };
-        setCowFunds([...cowFunds, fund]);
+        const updatedFunds = [...cowFunds, fund];
+        setCowFunds(updatedFunds);
+        saveCowFunds(updatedFunds).catch(console.error); // Persist
         setNewCowFund({ name: '', target: '' });
     };
 
@@ -89,7 +91,7 @@ export default function BudgetDashboard() {
 
         const amount = parseFloat(newContribution.amount);
 
-        setCowFunds(prev => prev.map(fund => {
+        const updatedFunds = cowFunds.map(fund => {
             if (fund.id === newContribution.fundId) {
                 const updatedFund = {
                     ...fund,
@@ -108,13 +110,32 @@ export default function BudgetDashboard() {
                 return updatedFund;
             }
             return fund;
-        }));
+        });
 
+        setCowFunds(updatedFunds);
+        saveCowFunds(updatedFunds).catch(console.error); // Persist
         setNewContribution({ ...newContribution, amount: '' });
+    };
+
+    const handleClearCowFunds = async () => {
+        if (!confirm("⚠️ ¿Estás seguro de eliminar TODAS las Vacas y sus registros? Esta acción no se puede deshacer.")) return;
+
+        try {
+            await clearCowFundsData();
+            setCowFunds([]); // Reset to empty, or INITIAL_COW_FUNDS if preferred, but usually clear means clear all user data
+        } catch (error) {
+            console.error("Error clearing cow funds:", error);
+        }
     };
 
     // Load initial missing items on mount
     useEffect(() => {
+        getCowFunds().then(funds => {
+            if (funds && funds.length > 0) {
+                setCowFunds(funds);
+            }
+        });
+
         const localItems = JSON.parse(localStorage.getItem('missingItems') || '[]');
         setMissingItems(localItems);
 
@@ -587,13 +608,23 @@ export default function BudgetDashboard() {
                                             Para esos caprichos extra que no todos pagan. Crea una bolsa y suma voluntarios.
                                         </p>
                                     </div>
-                                    <button
-                                        onClick={() => setShowCowFundModal(true)}
-                                        className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-amber-500/50 rounded-full px-6 py-2 flex items-center gap-2 transition-all shadow-lg"
-                                    >
-                                        <Plus className="w-4 h-4 text-amber-500" />
-                                        <span>Crear Nueva Vaca</span>
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={handleClearCowFunds}
+                                            className="bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-500/30 rounded-full px-4 py-2 flex items-center gap-2 transition-all text-xs font-bold"
+                                            title="Borrar todas las vacas y aportes"
+                                        >
+                                            <AlertTriangle className="w-3 h-3" />
+                                            Limpiar (Beta)
+                                        </button>
+                                        <button
+                                            onClick={() => setShowCowFundModal(true)}
+                                            className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-amber-500/50 rounded-full px-6 py-2 flex items-center gap-2 transition-all shadow-lg"
+                                        >
+                                            <Plus className="w-4 h-4 text-amber-500" />
+                                            <span>Crear Nueva Vaca</span>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

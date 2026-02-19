@@ -122,3 +122,84 @@ export async function clearFailedItems() {
         }
     }
 }
+
+const COW_FUND_DB_FILE = path.join(process.cwd(), 'cow_funds.json');
+const COW_FUND_KV_KEY = 'cow_funds';
+
+export async function saveCowFunds(funds: any[]) {
+    // DEVELOPMENT: Local File System
+    if (process.env.NODE_ENV !== 'production' && !process.env.KV_REST_API_URL) {
+        try {
+            fs.writeFileSync(COW_FUND_DB_FILE, JSON.stringify(funds, null, 2));
+            return { success: true };
+        } catch (error) {
+            console.error("Error writing local cow fund DB:", error);
+            return { success: false };
+        }
+    }
+
+    // PRODUCTION: Vercel KV
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+        try {
+            await kv.set(COW_FUND_KV_KEY, funds);
+            return { success: true };
+        } catch (error) {
+            console.error("Error saving cow funds to KV:", error);
+            return { success: false };
+        }
+    }
+
+    return { success: false };
+}
+
+export async function getCowFunds() {
+    // DEVELOPMENT: Local File System
+    if (process.env.NODE_ENV !== 'production' && !process.env.KV_REST_API_URL) {
+        if (!fs.existsSync(COW_FUND_DB_FILE)) return [];
+        try {
+            const data = fs.readFileSync(COW_FUND_DB_FILE, 'utf8');
+            return JSON.parse(data);
+        } catch (error) {
+            return [];
+        }
+    }
+
+    // PRODUCTION: Vercel KV
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+        try {
+            const funds = await kv.get(COW_FUND_KV_KEY);
+            return (funds as any[]) || [];
+        } catch (error) {
+            console.error("Error reading cow funds from KV:", error);
+            return [];
+        }
+    }
+
+    return [];
+}
+
+export async function clearCowFundsData() {
+    // DEVELOPMENT: Local File System
+    if (process.env.NODE_ENV !== 'production' && !process.env.KV_REST_API_URL) {
+        try {
+            if (fs.existsSync(COW_FUND_DB_FILE)) {
+                fs.writeFileSync(COW_FUND_DB_FILE, '[]');
+            }
+            return { success: true };
+        } catch (error) {
+            return { success: false };
+        }
+    }
+
+    // PRODUCTION: Vercel KV
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+        try {
+            await kv.del(COW_FUND_KV_KEY);
+            return { success: true };
+        } catch (error) {
+            return { success: false };
+        }
+    }
+
+    return { success: false };
+}
