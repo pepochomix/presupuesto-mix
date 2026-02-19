@@ -91,3 +91,61 @@ export const budgetData: Dish[] = [
         ]
     }
 ];
+
+export type SeasonalityStatus = 'best_time' | 'normal' | 'expensive' | 'banned' | 'out_of_stock';
+
+export interface HistoricItem {
+    name: string;
+    lastPrice: number; // Price per unit in the previous event
+    seasonality: SeasonalityStatus;
+    seasonalityMsg?: string;
+}
+
+// Mock Database of Historic Prices and Seasons
+export const HISTORIC_DATA: Record<string, HistoricItem> = {
+    "Panceta de cerdo con piel y sin hueso": {
+        name: "Panceta de cerdo",
+        lastPrice: 38.00, // Was cheaper before
+        seasonality: 'normal'
+    },
+    "Limon": {
+        name: "Limon",
+        lastPrice: 5.00, // Inflation!
+        seasonality: 'expensive',
+        seasonalityMsg: "Escasez por lluvias"
+    },
+    "Papa Amarilla": {
+        name: "Papa Amarilla",
+        lastPrice: 5.50,
+        seasonality: 'best_time',
+        seasonalityMsg: "Cosecha en la sierra"
+    },
+    "Bonito": {
+        name: "Bonito",
+        lastPrice: 8.00,
+        seasonality: 'best_time',
+        seasonalityMsg: "Alerta: Pesca abundante, precio bajo histórico"
+    },
+    "Lenguado": {
+        name: "Lenguado",
+        lastPrice: 80.00,
+        seasonality: 'banned',
+        seasonalityMsg: "En veda reproductiva. Prohibido su consumo."
+    },
+    "Lomo Fino": {
+        name: "Lomo Fino",
+        lastPrice: 55.00,
+        seasonality: 'expensive',
+        seasonalityMsg: "Subió 15% respecto a la parrilla anterior"
+    },
+    "Palta": {
+        name: "Palta",
+        lastPrice: 10.00,
+        seasonality: 'normal'
+    },
+    "Cerveza Negra": {
+        name: "Cerveza Negra",
+        lastPrice: 6.50,
+        seasonality: 'normal'
+    }
+};

@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { budgetData, Dish, Ingredient } from "@/data/budgetData";
+import { budgetData, Dish, Ingredient, HISTORIC_DATA } from "@/data/budgetData";
 import { INITIAL_PARTICIPANTS, Participant } from "@/data/participants";
+import { INITIAL_COW_FUNDS, CowFundItem } from "@/data/cowFundData";
 import {
     Calculator,
     ShoppingCart,
@@ -24,7 +25,12 @@ import {
     UserMinus,
     Baby,
     X,
-    Check
+    Check,
+    Gift,
+    PiggyBank,
+    Coins,
+    AlertTriangle,
+    Leaf
 } from "lucide-react";
 import { saveFailedItem, getFailedItems, clearFailedItems } from "@/app/db";
 import {
@@ -54,6 +60,58 @@ export default function BudgetDashboard() {
     const [isSending, setIsSending] = useState(false);
     const [addedSuccess, setAddedSuccess] = useState(false);
     const [isClearing, setIsClearing] = useState(false);
+
+    // Cow Fund State
+    const [cowFunds, setCowFunds] = useState<CowFundItem[]>(INITIAL_COW_FUNDS);
+    const [newCowFund, setNewCowFund] = useState({ name: '', target: '' });
+    const [newContribution, setNewContribution] = useState({ fundId: '', participantId: '', amount: '' });
+    const [showCowFundModal, setShowCowFundModal] = useState(false);
+
+    const handleAddCowFund = () => {
+        if (!newCowFund.name || !newCowFund.target) return;
+        const fund: CowFundItem = {
+            id: `cow-${Date.now()}`,
+            name: newCowFund.name,
+            targetAmount: parseFloat(newCowFund.target),
+            currentAmount: 0,
+            status: 'active',
+            contributors: []
+        };
+        setCowFunds([...cowFunds, fund]);
+        setNewCowFund({ name: '', target: '' });
+    };
+
+    const handleContribute = () => {
+        if (!newContribution.fundId || !newContribution.participantId || !newContribution.amount) return;
+
+        const participant = participants.find(p => p.id === newContribution.participantId);
+        if (!participant) return;
+
+        const amount = parseFloat(newContribution.amount);
+
+        setCowFunds(prev => prev.map(fund => {
+            if (fund.id === newContribution.fundId) {
+                const updatedFund = {
+                    ...fund,
+                    currentAmount: fund.currentAmount + amount,
+                    contributors: [...fund.contributors, {
+                        id: `c-${Date.now()}`,
+                        participantId: participant.id,
+                        name: participant.name,
+                        amount: amount,
+                        timestamp: new Date().toISOString()
+                    }]
+                };
+                if (updatedFund.currentAmount >= updatedFund.targetAmount) {
+                    updatedFund.status = 'completed';
+                }
+                return updatedFund;
+            }
+            return fund;
+        }));
+
+        setNewContribution({ ...newContribution, amount: '' });
+    };
 
     // Load initial missing items on mount
     useEffect(() => {
@@ -158,6 +216,13 @@ export default function BudgetDashboard() {
     const handleToggleParticipant = (id: string) => {
         setParticipants(prev => prev.map(p => {
             if (p.id === id) return { ...p, isActive: !p.isActive };
+            return p;
+        }));
+    };
+
+    const handleTogglePaid = (id: string) => {
+        setParticipants(prev => prev.map(p => {
+            if (p.id === id) return { ...p, hasPaid: !p.hasPaid };
             return p;
         }));
     };
@@ -371,6 +436,8 @@ export default function BudgetDashboard() {
                                 </div>
                             </header>
 
+                            <SeasonalityAlerts />
+
                             {/* KPIs Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                                 <KpiCard
@@ -505,7 +572,125 @@ export default function BudgetDashboard() {
                                 </motion.div>
                             )}
 
-                            {/* Missing Items Section */}
+                            {/* Cow Fund Section */}
+                            <div className="mt-16 mb-16 relative">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 px-2">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
+                                            <span className="bg-amber-500/20 text-amber-400 p-2 rounded-lg">
+                                                <Gift className="w-6 h-6" />
+                                            </span>
+                                            La Vaca del Cariño
+                                            <span className="text-xs bg-amber-500 text-slate-900 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Beta</span>
+                                        </h2>
+                                        <p className="text-slate-400 mt-2 max-w-2xl">
+                                            Para esos caprichos extra que no todos pagan. Crea una bolsa y suma voluntarios.
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowCowFundModal(true)}
+                                        className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-amber-500/50 rounded-full px-6 py-2 flex items-center gap-2 transition-all shadow-lg"
+                                    >
+                                        <Plus className="w-4 h-4 text-amber-500" />
+                                        <span>Crear Nueva Vaca</span>
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {cowFunds.map(fund => {
+                                        const progress = Math.min((fund.currentAmount / fund.targetAmount) * 100, 100);
+                                        const isCompleted = progress >= 100;
+
+                                        return (
+                                            <div key={fund.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden group hover:border-amber-500/30 transition-colors">
+                                                {isCompleted && (
+                                                    <div className="absolute top-0 right-0 bg-emerald-500 text-slate-900 text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider shadow-lg z-10">
+                                                        ¡Completado!
+                                                    </div>
+                                                )}
+
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div>
+                                                        <h3 className="font-bold text-slate-100 text-lg">{fund.name}</h3>
+                                                        <p className="text-sm text-slate-400">Meta: <span className="text-emerald-400 font-mono font-bold">S/ {fund.targetAmount.toFixed(2)}</span></p>
+                                                    </div>
+                                                    <div className="bg-slate-950 p-2 rounded-full border border-slate-800">
+                                                        <PiggyBank className={`w-6 h-6 ${isCompleted ? 'text-emerald-400' : 'text-amber-500'}`} />
+                                                    </div>
+                                                </div>
+
+                                                <div className="mb-4">
+                                                    <div className="flex justify-between text-xs mb-1.5">
+                                                        <span className="text-slate-500 font-medium">{fund.contributors.length} aportantes</span>
+                                                        <span className={`font-bold ${isCompleted ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                                            {progress.toFixed(0)}%
+                                                        </span>
+                                                    </div>
+                                                    <div className="h-3 w-full bg-slate-950 rounded-full overflow-hidden border border-slate-800/50">
+                                                        <motion.div
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${progress}%` }}
+                                                            transition={{ duration: 1, ease: "easeOut" }}
+                                                            className={`h-full ${isCompleted ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-600 to-amber-400'}`}
+                                                        />
+                                                    </div>
+                                                    <div className="mt-1 text-right text-xs text-slate-500 font-mono">
+                                                        Faltan: S/ {Math.max(fund.targetAmount - fund.currentAmount, 0).toFixed(2)}
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    {/* Quick Contribute Form */}
+                                                    {!isCompleted && (
+                                                        <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-800/50">
+                                                            <p className="text-[10px] text-slate-500 uppercase font-bold mb-2 text-center">Sumar Aporte</p>
+                                                            <div className="grid grid-cols-2 gap-2 mb-2">
+                                                                <select
+                                                                    className="bg-slate-900 border border-slate-800 text-slate-300 text-xs rounded-lg px-2 py-1.5 outline-none focus:border-amber-500"
+                                                                    value={newContribution.participantId}
+                                                                    onChange={(e) => setNewContribution({ ...newContribution, participantId: e.target.value, fundId: fund.id })}
+                                                                >
+                                                                    <option value="">¿Quién?</option>
+                                                                    {participants.filter(p => p.isActive && p.type === 'Adulto').map(p => (
+                                                                        <option key={p.id} value={p.id}>{p.name}</option>
+                                                                    ))}
+                                                                </select>
+                                                                <input
+                                                                    type="number"
+                                                                    placeholder="Monto"
+                                                                    className="bg-slate-900 border border-slate-800 text-slate-300 text-xs rounded-lg px-2 py-1.5 outline-none focus:border-amber-500"
+                                                                    value={newContribution.fundId === fund.id ? newContribution.amount : ''}
+                                                                    onChange={(e) => setNewContribution({ ...newContribution, amount: e.target.value, fundId: fund.id })}
+                                                                />
+                                                            </div>
+                                                            <button
+                                                                onClick={handleContribute}
+                                                                disabled={!newContribution.participantId || !newContribution.amount || newContribution.fundId !== fund.id}
+                                                                className="w-full bg-slate-800 hover:bg-emerald-600 hover:text-white text-slate-400 text-xs font-bold py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                <Coins className="w-3 h-3" />
+                                                                Aportar
+                                                            </button>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Contributors List */}
+                                                    {fund.contributors.length > 0 && (
+                                                        <div className="max-h-24 overflow-y-auto custom-scrollbar pr-1">
+                                                            {fund.contributors.slice().reverse().map(c => (
+                                                                <div key={c.id} className="flex justify-between items-center text-xs py-1 border-b border-slate-800/50 last:border-0">
+                                                                    <span className="text-slate-400">{c.name}</span>
+                                                                    <span className="text-emerald-500/80 font-mono">+ S/ {c.amount.toFixed(2)}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                             <div className="mt-16 bg-slate-900 border border-slate-800 rounded-3xl p-8 relative overflow-hidden">
                                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-amber-500"></div>
 
@@ -672,70 +857,63 @@ export default function BudgetDashboard() {
                                     </div>
                                 </div>
                             </div>
-
                         </div>
+
+                        <ParticipantsModal
+                            isOpen={showParticipantsModal}
+                            onClose={() => setShowParticipantsModal(false)}
+                            participants={participants}
+                            onToggle={handleToggleParticipant}
+                            onTogglePaid={handleTogglePaid}
+                            totalCost={totalCost}
+                            activePayingCount={activePayingCount}
+                        />
+
+                        <CowFundModal
+                            isOpen={showCowFundModal}
+                            onClose={() => setShowCowFundModal(false)}
+                            onAdd={handleAddCowFund}
+                            newFund={newCowFund}
+                            setNewFund={setNewCowFund}
+                        />
 
                     </motion.div>
                 )}
-
             </AnimatePresence>
-
-            <ParticipantsModal
-                isOpen={showParticipantsModal}
-                onClose={() => setShowParticipantsModal(false)}
-                participants={participants}
-                onToggle={handleToggleParticipant}
-                totalCost={totalCost}
-                activePayingCount={activePayingCount}
-            />
         </>
     );
 }
 
-// ... (Other components)
-
-
-
-// ... (KpiCard, DishRow, IngredientRow, etc.) - These remain unchanged but are included for context context context
 
 function ComparativeMarketAnalysis({ data }: { data: Dish[] }) {
-    // Determine Top 10 Most Expensive Ingredients (Unit Price) to graph
-    const allIngredients = data.flatMap(d => d.ingredients);
-
-    // Sort by Total Price to find biggest impact items
-    const topIngredients = [...allIngredients]
-        .sort((a, b) => b.priceTotal - a.priceTotal)
-        .slice(0, 10)
-        .map(item => {
-            const bestPrice = item.marketPrices.length > 0 ? Math.min(...item.marketPrices.map(m => m.price)) : item.priceUnit;
-            // Best Market Name
-            const bestMarket = item.marketPrices.find(m => m.price === bestPrice)?.marketName || "N/A";
+    // Generate data for graph
+    const topIngredients = data.flatMap(d => d.ingredients)
+        .filter(i => i.marketPrices && i.marketPrices.length > 0)
+        .map(i => {
+            const best = Math.min(...i.marketPrices.map(m => m.price));
+            const bestMarket = i.marketPrices.find(m => m.price === best)?.marketName || 'Mercado';
 
             return {
-                name: item.name.length > 15 ? item.name.substring(0, 15) + '...' : item.name,
-                full_name: item.name,
-                "Tu Precio": item.priceUnit,
-                "Mercado Local": bestPrice, // Represents the optimized/best found
+                name: i.name.substring(0, 10), // Short name for axis
+                full_name: i.name,
+                "Tu Precio": i.priceTotal, // Using total for impact
+                "Mercado Local": (best * i.quantity),
                 best_market: bestMarket,
-                savings: item.priceUnit - bestPrice
+                savings: i.priceTotal - (best * i.quantity)
             };
-        });
+        })
+        .sort((a, b) => b.savings - a.savings) // Show biggest savings first
+        .slice(0, 10); // Top 10 opportunities
 
     return (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden my-8">
             <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 relative z-10">
-                <div>
-                    <h2 className="text-3xl font-bold text-slate-100 flex items-center gap-3">
-                        <TrendingUp className="w-8 h-8 text-emerald-500" />
-                        Curva de Oportunidad
-                    </h2>
-                    <p className="text-slate-400 mt-2 max-w-2xl">
-                        Visualización de precios unitarios de tus insumos más costosos frente a las mejores ofertas detectadas en mercados locales (Metro, Tottus, Mercado Central).
-                        El área sombreada representa tu <span className="text-emerald-400 font-bold">margen de ahorro potencial</span>.
-                    </p>
-                </div>
+            <div className="relative z-10 mb-8">
+                <h3 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
+                    <TrendingUp className="w-8 h-8 text-emerald-400" />
+                    Análisis de Mercado
+                </h3>
+                <p className="text-slate-400">Comparativa de tus costos vs. precios óptimos locales</p>
             </div>
 
             <div className="h-[400px] w-full relative z-10">
@@ -759,13 +937,11 @@ function ComparativeMarketAnalysis({ data }: { data: Dish[] }) {
                             axisLine={false}
                             tickLine={false}
                         />
-                        <YAxis
-                            stroke="#94a3b8"
-                        />
+                        <YAxis stroke="#94a3b8" />
                         <Tooltip
                             contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f1f5f9' }}
                             itemStyle={{ color: '#cbd5e1' }}
-                            formatter={(value: number | undefined) => [value ? `S/ ${value.toFixed(2)}` : 'N/A', '']}
+                            formatter={(value: number | undefined) => [value ? `S/ ${value ? value.toFixed(2) : '0.00'}` : 'N/A', '']}
                             labelStyle={{ color: '#f59e0b', fontWeight: 'bold', marginBottom: '0.5rem' }}
                         />
                         <Legend wrapperStyle={{ paddingTop: '20px' }} />
@@ -802,12 +978,11 @@ function ComparativeMarketAnalysis({ data }: { data: Dish[] }) {
                         </div>
                     </div>
                 ))}
-
-
             </div>
         </div>
     );
 }
+
 
 function KpiCard({ title, value, subtitle, icon, trend, isPositive }: any) {
     return (
@@ -835,7 +1010,13 @@ function KpiCard({ title, value, subtitle, icon, trend, isPositive }: any) {
     );
 }
 
-function DishRow({ dish, isExpanded, onToggle, isOptimized, onUpdate }: {
+function DishRow({
+    dish,
+    isExpanded,
+    onToggle,
+    isOptimized,
+    onUpdate
+}: {
     dish: Dish,
     isExpanded: boolean,
     onToggle: () => void,
@@ -944,10 +1125,47 @@ function IngredientRow({
 
     const [isFocused, setIsFocused] = useState(false);
 
+    // Historic Data Check
+    const historicData = HISTORIC_DATA[ingredient.name];
+    const inflationRate = historicData ? ((ingredient.priceUnit - historicData.lastPrice) / historicData.lastPrice) : 0;
+    const isPriceHigher = inflationRate > 0.05; // 5% threshold
+
     return (
-        <div className={`grid grid-cols-12 items-center p-3 rounded-lg text-sm gap-2 transition-colors duration-300 ${isCheaper ? 'bg-emerald-900/10 border border-emerald-500/20' : hasDiscount ? 'bg-red-900/10 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'hover:bg-slate-800/30 group'}`}>
+        <div className={`grid grid-cols-12 items-center p-3 rounded-lg text-sm gap-2 transition-colors duration-300 ${historicData?.seasonality === 'banned' ? 'bg-red-950/30 border border-red-500/50' : isCheaper ? 'bg-emerald-900/10 border border-emerald-500/20' : hasDiscount ? 'bg-red-900/10 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'hover:bg-slate-800/30 group'}`}>
             <div className="col-span-5 pr-2">
-                <p className={`font-medium break-words ${hasDiscount ? 'text-red-400' : 'text-slate-300'}`}>{ingredient.name}</p>
+                <div className="flex items-center flex-wrap gap-2">
+                    <p className={`font-medium break-words ${hasDiscount ? 'text-red-400' : 'text-slate-300'}`}>{ingredient.name}</p>
+
+                    {/* Seasonality Badges */}
+                    {historicData && (
+                        <>
+                            {historicData.seasonality === 'best_time' && (
+                                <span className="bg-emerald-500/20 text-emerald-400 text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-emerald-500/30" title={historicData.seasonalityMsg}>
+                                    <Leaf className="w-3 h-3" /> Temporada
+                                </span>
+                            )}
+                            {historicData.seasonality === 'banned' && (
+                                <span className="bg-red-500/20 text-red-400 text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-red-500/30 font-bold uppercase animate-pulse" title={historicData.seasonalityMsg}>
+                                    <AlertTriangle className="w-3 h-3" /> VEDA
+                                </span>
+                            )}
+                            {historicData.seasonality === 'expensive' && (
+                                <span className="bg-amber-500/20 text-amber-400 text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-amber-500/30" title={historicData.seasonalityMsg}>
+                                    <TrendingUp className="w-3 h-3" /> Sube
+                                </span>
+                            )}
+                        </>
+                    )}
+                </div>
+
+                {/* Inflation Warning */}
+                {isPriceHigher && (
+                    <div className="text-[10px] text-red-400 flex items-center gap-1 mt-1 font-mono">
+                        <TrendingUp className="w-3 h-3" />
+                        Subió {(inflationRate * 100).toFixed(0)}% vs. mes anterior
+                    </div>
+                )}
+
                 {isCheaper && !hasDiscount && (
                     <div className="flex items-center gap-1 mt-1 text-xs text-emerald-400">
                         <ArrowRight className="w-3 h-3" />
@@ -1035,6 +1253,7 @@ function ParticipantsModal({
     onClose,
     participants,
     onToggle,
+    onTogglePaid,
     totalCost,
     activePayingCount
 }: {
@@ -1042,9 +1261,20 @@ function ParticipantsModal({
     onClose: () => void;
     participants: Participant[];
     onToggle: (id: string) => void;
+    onTogglePaid: (id: string) => void;
     totalCost: number;
     activePayingCount: number;
 }) {
+    const [mode, setMode] = useState<'manage' | 'collect'>('manage');
+    const [showQr, setShowQr] = useState(false);
+
+    const costPerPerson = activePayingCount > 0 ? (totalCost / activePayingCount) : 0;
+
+    const generatePaymentLink = (name: string, amount: number) => {
+        const message = `Hola ${name}, tu cuota para la comanda es de S/ ${amount.toFixed(2)}. Puedes yapear aquí.`;
+        return `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+    };
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -1060,88 +1290,195 @@ function ParticipantsModal({
                         initial={{ scale: 0.95, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        className="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col z-10"
+                        className="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] overflow-hidden flex flex-col z-10"
                     >
-                        <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900 z-10">
-                            <h3 className="text-lg font-bold text-slate-200 flex items-center gap-2">
-                                <Users className="w-5 h-5 text-amber-500" />
-                                Gestionar Invitados
-                            </h3>
-                            <button
-                                onClick={onClose}
-                                className="p-1 hover:bg-slate-800 rounded-full transition-colors text-slate-400 hover:text-white"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
+                        <div className="p-4 border-b border-slate-800 bg-slate-900 z-10 space-y-4">
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-lg font-bold text-slate-200 flex items-center gap-2">
+                                    <Users className="w-5 h-5 text-amber-500" />
+                                    Gestionar Invitados
+                                </h3>
+                                <button
+                                    onClick={onClose}
+                                    className="p-1 hover:bg-slate-800 rounded-full transition-colors text-slate-400 hover:text-white"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {/* Mode Toggle */}
+                            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-950 rounded-xl">
+                                <button
+                                    onClick={() => setMode('manage')}
+                                    className={`py-2 rounded-lg text-xs font-bold transition-colors ${mode === 'manage' ? 'bg-slate-800 text-slate-100 shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    Asistencia
+                                </button>
+                                <button
+                                    onClick={() => setMode('collect')}
+                                    className={`py-2 rounded-lg text-xs font-bold transition-colors ${mode === 'collect' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    Cobranza ($)
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
-                            <div className="space-y-2">
-                                {participants.map((p) => (
-                                    <div
-                                        key={p.id}
-                                        onClick={() => onToggle(p.id)}
-                                        className={`
-                                        flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border group select-none
-                                        ${p.isActive
-                                                ? 'bg-slate-800/80 border-slate-700 hover:bg-slate-800'
-                                                : 'bg-slate-950/50 border-transparent opacity-60 hover:opacity-100'
-                                            }
-                                    `}
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className={`
-                                                w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors
-                                                ${p.isActive ? 'bg-amber-500 border-amber-500' : 'border-slate-600 group-hover:border-slate-500'}
-                                            `}>
-                                                {p.isActive && <Check className="w-4 h-4 text-slate-900 stroke-[3]" />}
+                        {mode === 'manage' ? (
+                            <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
+                                <div className="space-y-2">
+                                    {participants.map((p) => (
+                                        <div
+                                            key={p.id}
+                                            onClick={() => onToggle(p.id)}
+                                            className={`
+                                            flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border group select-none
+                                            ${p.isActive
+                                                    ? 'bg-slate-800/80 border-slate-700 hover:bg-slate-800'
+                                                    : 'bg-slate-950/50 border-transparent opacity-60 hover:opacity-100'
+                                                }
+                                        `}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className={`
+                                                    w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors
+                                                    ${p.isActive ? 'bg-amber-500 border-amber-500' : 'border-slate-600 group-hover:border-slate-500'}
+                                                `}>{p.isActive && <Check className="w-4 h-4 text-slate-900 stroke-[3]" />}</div>
+
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`
+                                                        w-10 h-10 rounded-full flex items-center justify-center border
+                                                        ${p.isActive
+                                                            ? (p.type === 'Adulto' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-blue-500/10 border-blue-500/30 text-blue-400')
+                                                            : 'bg-slate-800 border-slate-700 text-slate-600'}
+                                                    `}>{p.type === 'Niño' ? <Baby className="w-5 h-5" /> : <User className="w-5 h-5" />}</div>
+                                                    <div>
+                                                        <p className={`font-bold text-base ${p.isActive ? 'text-slate-100' : 'text-slate-500'}`}>{p.name}</p>
+                                                        <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500 flex items-center gap-1">
+                                                            {p.type}
+                                                            {p.isActive && (
+                                                                <span className={p.type === 'Adulto' ? 'text-emerald-500' : 'text-blue-500'} >
+                                                                    • {p.type === 'Adulto' ? 'Participa y Paga' : 'Participa Gratis'}
+                                                                </span>
+                                                            )}
+                                                            {!p.isActive && <span className="text-slate-600">• No Participa</span>}
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             </div>
 
+                                            <div className="text-right">
+                                                {p.isActive ? (
+                                                    p.type === 'Adulto' ? (
+                                                        <div className="text-emerald-400 font-bold text-sm bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
+                                                            S/ {costPerPerson.toFixed(2)}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-blue-400 font-bold text-xs bg-blue-500/10 px-2 py-1 rounded-md border border-blue-500/20">
+                                                            S/ 0.00
+                                                        </div>
+                                                    )
+                                                ) : (
+                                                    <div className="text-slate-600 font-bold text-xs px-2 py-1">
+                                                        --
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-6">
+                                {/* Dashboard Summary */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-emerald-900/20 border border-emerald-500/30 p-4 rounded-xl text-center">
+                                        <p className="text-xs text-emerald-400 uppercase font-bold mb-1">Pagados</p>
+                                        <p className="text-2xl font-bold text-emerald-300">
+                                            {participants.filter(p => p.isActive && p.type === 'Adulto' && p.hasPaid).length}
+                                            <span className="text-sm text-emerald-500/70 ml-1">/ {activePayingCount}</span>
+                                        </p>
+                                    </div>
+                                    <div className="bg-red-900/20 border border-red-500/30 p-4 rounded-xl text-center">
+                                        <p className="text-xs text-red-400 uppercase font-bold mb-1">Por Cobrar</p>
+                                        <p className="text-2xl font-bold text-red-300">
+                                            S/ {(participants.filter(p => p.isActive && p.type === 'Adulto' && !p.hasPaid).length * costPerPerson).toFixed(2)}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* QR Code Toggle */}
+                                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center">
+                                    <button
+                                        onClick={() => setShowQr(!showQr)}
+                                        className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2 mb-2"
+                                    >
+                                        <div className="w-5 h-5 bg-white rounded-sm p-0.5">
+                                            <div className="w-full h-full bg-black"></div>
+                                        </div>
+                                        {showQr ? 'Ocultar QR Yape/Plin' : 'Mostrar QR Yape/Plin'}
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {showQr && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: "auto", opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="mt-4 p-2 bg-white rounded-xl inline-block">
+                                                    <img src="/WhatsApp Image 2026-02-18 at 11.26.49 PM.jpeg" alt="QR Yape Plin" className="w-48 h-auto rounded-lg" />
+                                                </div>
+                                                <p className="text-slate-500 text-xs mt-2">Escanea para pagar S/ {costPerPerson.toFixed(2)}</p>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                                {/* Collection List */}
+                                <div className="space-y-3">
+                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-2">Lista de Pagos</h4>
+                                    {participants.filter(p => p.isActive && p.type === 'Adulto').map(p => (
+                                        <div key={p.id} className="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
                                             <div className="flex items-center gap-3">
-                                                <div className={`
-                                                    w-10 h-10 rounded-full flex items-center justify-center border
-                                                    ${p.isActive
-                                                        ? (p.type === 'Adulto' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-blue-500/10 border-blue-500/30 text-blue-400')
-                                                        : 'bg-slate-800 border-slate-700 text-slate-600'}
-                                                `}>
-                                                    {p.type === 'Niño' ? <Baby className="w-5 h-5" /> : <User className="w-5 h-5" />}
+                                                <div
+                                                    onClick={() => onTogglePaid(p.id)}
+                                                    className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-colors border-2 ${p.hasPaid ? 'bg-emerald-500 border-emerald-500 text-slate-900' : 'bg-slate-900 border-red-500/50 text-red-500 hover:border-red-500'}`}
+                                                >
+                                                    {p.hasPaid ? <Check className="w-6 h-6 stroke-[3]" /> : <span className="font-bold text-xs">NO</span>}
                                                 </div>
                                                 <div>
-                                                    <p className={`font-bold text-base ${p.isActive ? 'text-slate-100' : 'text-slate-500'}`}>{p.name}</p>
-                                                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500 flex items-center gap-1">
-                                                        {p.type}
-                                                        {p.isActive && (
-                                                            <span className={p.type === 'Adulto' ? 'text-emerald-500' : 'text-blue-500'}>
-                                                                • {p.type === 'Adulto' ? 'Participa y Paga' : 'Participa Gratis'}
-                                                            </span>
-                                                        )}
-                                                        {!p.isActive && <span className="text-slate-600">• No Participa</span>}
+                                                    <p className={`font-bold ${p.hasPaid ? 'text-slate-300' : 'text-slate-100'}`}>{p.name}</p>
+                                                    <p className={`text-xs ${p.hasPaid ? 'text-emerald-500' : 'text-red-400 font-bold'}`}>
+                                                        {p.hasPaid ? 'Pagado' : 'Pendiente'}
                                                     </p>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div className="text-right">
-                                            {p.isActive ? (
-                                                p.type === 'Adulto' ? (
-                                                    <div className="text-emerald-400 font-bold text-sm bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
-                                                        S/ {activePayingCount > 0 ? (totalCost / activePayingCount).toFixed(2) : '0.00'}
-                                                    </div>
-                                                ) : (
-                                                    <div className="text-blue-400 font-bold text-xs bg-blue-500/10 px-2 py-1 rounded-md border border-blue-500/20">
-                                                        S/ 0.00
-                                                    </div>
-                                                )
-                                            ) : (
-                                                <div className="text-slate-600 font-bold text-xs px-2 py-1">
-                                                    --
+                                            {!p.hasPaid && (
+                                                <div className="flex items-center gap-2">
+                                                    <a
+                                                        href={generatePaymentLink(p.name, costPerPerson)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="p-2 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-lg transition-colors"
+                                                        title="Enviar Cobro por WhatsApp"
+                                                    >
+                                                        <Send className="w-4 h-4" />
+                                                    </a>
+                                                </div>
+                                            )}
+                                            {p.hasPaid && (
+                                                <div className="text-emerald-500 text-xs font-mono font-bold">
+                                                    + S/ {costPerPerson.toFixed(2)}
                                                 </div>
                                             )}
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
+
 
                         <div className="p-4 bg-slate-900 border-t border-slate-800 text-center space-y-2">
                             <div className="flex justify-between items-center text-sm px-2">
@@ -1284,6 +1621,136 @@ function IntroScreen() {
                 </motion.div>
             </div>
         </motion.div>
+    );
+}
+
+function CowFundModal({
+    isOpen,
+    onClose,
+    onAdd,
+    newFund,
+    setNewFund
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    onAdd: () => void;
+    newFund: { name: string; target: string };
+    setNewFund: (val: { name: string; target: string }) => void;
+}) {
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+                        onClick={onClose}
+                    />
+                    <motion.div
+                        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                        className="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col z-10"
+                    >
+                        <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900 z-10">
+                            <h3 className="text-lg font-bold text-slate-200 flex items-center gap-2">
+                                <Gift className="w-5 h-5 text-amber-500" />
+                                Nueva Vaca
+                            </h3>
+                            <button
+                                onClick={onClose}
+                                className="p-1 hover:bg-slate-800 rounded-full transition-colors text-slate-400 hover:text-white"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Nombre del Capricho</label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej. Whisky Blue Label"
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:border-amber-500 outline-none transition-colors"
+                                    value={newFund.name}
+                                    onChange={(e) => setNewFund({ ...newFund, name: e.target.value })}
+                                    autoFocus
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Meta a Juntar (S/)</label>
+                                <input
+                                    type="number"
+                                    placeholder="0.00"
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:border-amber-500 outline-none transition-colors"
+                                    value={newFund.target}
+                                    onChange={(e) => setNewFund({ ...newFund, target: e.target.value })}
+                                />
+                            </div>
+
+                            <button
+                                onClick={() => {
+                                    onAdd();
+                                    onClose();
+                                }}
+                                disabled={!newFund.name || !newFund.target}
+                                className="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-3 rounded-xl transition-all flex justify-center items-center gap-2 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Crear Vaca
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+        </AnimatePresence>
+    );
+}
+
+function SeasonalityAlerts() {
+    const alerts = Object.values(HISTORIC_DATA).filter(
+        item => item.seasonality === 'best_time' || item.seasonality === 'banned' || item.seasonality === 'expensive'
+    );
+
+    if (alerts.length === 0) return null;
+
+    return (
+        <div className="mb-8">
+            <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                Alertas de Mercado
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {alerts.map((item) => (
+                    <div
+                        key={item.name}
+                        className={`p-3 rounded-xl border flex items-center gap-3 ${item.seasonality === 'best_time'
+                            ? 'bg-emerald-900/20 border-emerald-500/30'
+                            : item.seasonality === 'banned'
+                                ? 'bg-red-900/20 border-red-500/30'
+                                : 'bg-amber-900/20 border-amber-500/30'
+                            }`}
+                    >
+                        <div className={`p-2 rounded-lg ${item.seasonality === 'best_time' ? 'bg-emerald-500/20 text-emerald-400' :
+                            item.seasonality === 'banned' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'
+                            }`}>
+                            {item.seasonality === 'best_time' ? <Leaf className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
+                        </div>
+                        <div>
+                            <p className={`font-bold text-sm ${item.seasonality === 'best_time' ? 'text-emerald-200' : 'text-slate-200'
+                                }`}>
+                                {item.name}
+                            </p>
+                            <p className="text-xs text-slate-400 leading-tight">
+                                {item.seasonalityMsg || (item.seasonality === 'best_time' ? 'Precio bajo histórico' : 'Precio elevado')}
+                            </p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 }
 
