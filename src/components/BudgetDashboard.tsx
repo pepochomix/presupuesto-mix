@@ -282,401 +282,413 @@ export default function BudgetDashboard() {
     ];
 
     return (
-        <AnimatePresence mode="wait">
-            {showIntro ? (
-                <IntroScreen key="intro" />
-            ) : (
-                <motion.div
-                    key="dashboard"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 1 }}
-                    className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-amber-500/30"
-                >
-                    <BudgetTicker data={currentData} />
+        <>
+            <AnimatePresence mode="wait">
+                {showIntro ? (
+                    <IntroScreen key="intro" />
+                ) : (
+                    <motion.div
+                        key="dashboard"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 1 }}
+                        className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-amber-500/30"
+                    >
+                        <BudgetTicker data={currentData} />
 
-                    <div className="max-w-7xl mx-auto px-4 py-8">
+                        <div className="max-w-7xl mx-auto px-4 py-8">
 
-                        {/* Header */}
-                        {/* Header */}
-                        <header className="flex flex-col md:flex-row justify-between items-center mb-8 md:mb-10 gap-6 md:gap-4">
-                            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
-                                <div className="relative w-28 h-20 md:w-32 md:h-24 rounded-xl overflow-hidden shadow-2xl border-2 border-amber-500/20 group shrink-0">
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent z-10"></div>
-                                    <img
-                                        src="/Ajo Professional_food_photography_2k_20260218142.jpeg"
-                                        alt="Ajo Professional"
-                                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                                    />
-                                </div>
-                                <div>
-                                    <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-amber-400 to-orange-600 bg-clip-text text-transparent flex flex-col md:flex-row items-center gap-2 md:gap-3">
-                                        <Calculator className="w-6 h-6 md:w-8 md:h-8 text-amber-500" />
-                                        <span>Presupuesto Mix Editable</span>
-                                    </h1>
-                                    <p className="text-slate-400 mt-1 md:mt-2 text-sm md:text-lg">Dashboard Dinámico & Comparativa IA</p>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-wrap justify-center items-center gap-4 w-full md:w-auto">
-                                {/* People Count Edit */}
-                                <button
-                                    onClick={() => setShowParticipantsModal(true)}
-                                    className="bg-slate-900 border border-slate-700 hover:border-amber-500 rounded-full px-4 py-2 flex items-center gap-2 shadow-lg transition-colors group"
-                                >
-                                    <Users className="w-5 h-5 text-purple-400 group-hover:text-amber-400 transition-colors" />
-                                    <div className="flex flex-col items-start leading-none text-left">
-                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Comensales</span>
-                                        <div className="flex items-center gap-1">
-                                            <span className="text-sm font-bold text-slate-200">{activeTotalCount} Total</span>
-                                            <span className="text-xs text-slate-500">/</span>
-                                            <span className="text-sm font-bold text-emerald-400">{activePayingCount} Pagan</span>
-                                        </div>
+                            {/* Header */}
+                            {/* Header */}
+                            <header className="flex flex-col md:flex-row justify-between items-center mb-8 md:mb-10 gap-6 md:gap-4">
+                                <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
+                                    <div className="relative w-28 h-20 md:w-32 md:h-24 rounded-xl overflow-hidden shadow-2xl border-2 border-amber-500/20 group shrink-0">
+                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent z-10"></div>
+                                        <img
+                                            src="/Ajo Professional_food_photography_2k_20260218142.jpeg"
+                                            alt="Ajo Professional"
+                                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                                        />
                                     </div>
-                                    <ChevronDown className="w-4 h-4 text-slate-600" />
-                                </button>
+                                    <div>
+                                        <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-amber-400 to-orange-600 bg-clip-text text-transparent flex flex-col md:flex-row items-center gap-2 md:gap-3">
+                                            <Calculator className="w-6 h-6 md:w-8 md:h-8 text-amber-500" />
+                                            <span>Presupuesto Mix Editable</span>
+                                        </h1>
+                                        <p className="text-slate-400 mt-1 md:mt-2 text-sm md:text-lg">Dashboard Dinámico & Comparativa IA</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap justify-center items-center gap-4 w-full md:w-auto">
+                                    {/* People Count Edit */}
+                                    <button
+                                        onClick={() => setShowParticipantsModal(true)}
+                                        className="bg-slate-900 border border-slate-700 hover:border-amber-500 rounded-full px-4 py-2 flex items-center gap-2 shadow-lg transition-colors group"
+                                    >
+                                        <Users className="w-5 h-5 text-purple-400 group-hover:text-amber-400 transition-colors" />
+                                        <div className="flex flex-col items-start leading-none text-left">
+                                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Comensales</span>
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-sm font-bold text-slate-200">{activeTotalCount} Total</span>
+                                                <span className="text-xs text-slate-500">/</span>
+                                                <span className="text-sm font-bold text-emerald-400">{activePayingCount} Pagan</span>
+                                            </div>
+                                        </div>
+                                        <ChevronDown className="w-4 h-4 text-slate-600" />
+                                    </button>
 
 
-                                <button
-                                    onClick={toggleOptimization}
-                                    disabled={isLoading}
-                                    className={`
+                                    <button
+                                        onClick={toggleOptimization}
+                                        disabled={isLoading}
+                                        className={`
                                 relative overflow-hidden px-6 py-2 md:px-8 md:py-3 rounded-full font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl text-sm md:text-base
                                 ${isOptimized
-                                            ? 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700'
-                                            : 'bg-gradient-to-r from-amber-500 to-orange-600 text-slate-900 hover:shadow-orange-500/25'
-                                        }
+                                                ? 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700'
+                                                : 'bg-gradient-to-r from-amber-500 to-orange-600 text-slate-900 hover:shadow-orange-500/25'
+                                            }
                             `}
-                                >
-                                    <span className="relative z-10 flex items-center gap-2">
-                                        {isLoading ? (
-                                            <>
-                                                <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
-                                                <span>Analizando...</span>
-                                            </>
-                                        ) : isOptimized ? (
-                                            <>
-                                                <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
-                                                <span>Volver a Estándar</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
-                                                <span>Optimizar con IA</span>
-                                            </>
-                                        )}
-                                    </span>
-                                </button>
-                            </div>
-                        </header>
-
-                        {/* KPIs Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                            <KpiCard
-                                title="Costo Total"
-                                value={`S/ ${totalCost.toFixed(2)}`}
-                                icon={<ShoppingCart className="w-6 h-6 text-blue-400" />}
-                                trend={isOptimized ? `Ahorro: S/ ${savings.toFixed(2)}` : null}
-                                isPositive={true}
-                            />
-                            <KpiCard
-                                title="Costo por Adulto"
-                                value={activePayingCount > 0 ? `S/ ${(totalCost / activePayingCount).toFixed(2)}` : "N/A"}
-                                subtitle={`${activePayingCount} Pagantes (${activeTotalCount} Total)`}
-                                icon={<Users className="w-6 h-6 text-purple-400" />}
-                            />
-                            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden">
-                                <h3 className="text-slate-400 text-sm font-medium mb-4 z-10">Proyección de Ahorro</h3>
-                                <div className="h-24 w-full z-10">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={chartData} layout="vertical">
-                                            <XAxis type="number" hide />
-                                            <YAxis dataKey="name" type="category" hide />
-                                            <Tooltip
-                                                contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }}
-                                                cursor={{ fill: 'transparent' }}
-                                            />
-                                            <Bar dataKey="amount" radius={[0, 4, 4, 0]} barSize={20}>
-                                                {chartData.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={index === 0 ? '#64748b' : '#10b981'} />
-                                                ))}
-                                            </Bar>
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-                                {/* Abstract BG decoration */}
-                                <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl"></div>
-                            </div>
-                        </div>
-
-                        {/* Main Content Layout */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                            {/* Left Column: Dish List */}
-                            <div className="lg:col-span-2 space-y-4">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-2xl font-bold text-slate-200 flex items-center gap-2">
-                                        <Store className="w-6 h-6 text-amber-500" />
-                                        Detalle de Comanda
-                                    </h2>
-                                    <div className="text-xs text-slate-500 italic">
-                                        * Puedes editar cantidades y precios directamente
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    {currentData.map((dish) => (
-                                        <DishRow
-                                            key={dish.id}
-                                            dish={dish}
-                                            isExpanded={expandedDish === dish.id}
-                                            onToggle={() => setExpandedDish(expandedDish === dish.id ? null : dish.id)}
-                                            isOptimized={isOptimized}
-                                            onUpdate={handleUpdateIngredient}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Right Column: Market Analysis (Visible only when optimized) */}
-                            <div className="lg:col-span-1 space-y-8">
-                                <AnimatePresence>
-                                    {isOptimized && (
-                                        <motion.div
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: 20 }}
-                                            className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sticky top-8"
-                                        >
-                                            <h3 className="text-xl font-bold text-emerald-400 mb-6 flex items-center gap-2">
-                                                <TrendingDown className="w-6 h-6" />
-                                                Mejores Opciones
-                                            </h3>
-
-                                            <div className="space-y-6">
-                                                <div className="p-4 bg-emerald-900/20 border border-emerald-500/30 rounded-xl">
-                                                    <p className="text-emerald-300 text-sm mb-1">Ahorro Total Estimado</p>
-                                                    <p className="text-3xl font-bold text-emerald-400">S/ {savings.toFixed(2)}</p>
-                                                    <p className="text-xs text-emerald-500/80 mt-2">Reducción del {originalCost > 0 ? ((savings / originalCost) * 100).toFixed(1) : 0}%</p>
-                                                </div>
-
-                                                <div>
-                                                    <h4 className="text-slate-400 text-sm font-semibold mb-3 uppercase tracking-wider">Dónde comprar</h4>
-                                                    <div className="space-y-3">
-                                                        {marketBreakdown.sort((a, b) => b.value - a.value).map((market) => (
-                                                            <div key={market.name} className="flex justify-between items-center group">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="w-2 h-2 rounded-full bg-slate-600 group-hover:bg-amber-500 transition-colors"></div>
-                                                                    <span className="text-slate-300">{market.name}</span>
-                                                                </div>
-                                                                <span className="font-mono text-slate-400">S/ {market.value.toFixed(2)}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-
-                                                <div className="pt-6 border-t border-slate-800">
-                                                    <p className="text-xs text-slate-500 italic">
-                                                        * Precios referenciales comparados con base de datos histórica de mercados locales.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                    {!isOptimized && (
-                                        <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 text-center flex flex-col items-center justify-center h-64 border-dashed">
-                                            <Sparkles className="w-12 h-12 text-slate-700 mb-4" />
-                                            <p className="text-slate-500">Activa la IA para ver el análisis de mercado</p>
-                                        </div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-
-                        </div>
-
-                        {isOptimized && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="mt-12"
-                            >
-                                <ComparativeMarketAnalysis data={currentData} />
-                            </motion.div>
-                        )}
-
-                        {/* Missing Items Section */}
-                        <div className="mt-16 bg-slate-900 border border-slate-800 rounded-3xl p-8 relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-amber-500"></div>
-
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                                <div>
-                                    <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
-                                        <span className="bg-red-500/20 text-red-400 p-2 rounded-lg">
-                                            <MessageSquare className="w-6 h-6" />
-                                        </span>
-                                        ¿Faltó Algo?
-                                    </h2>
-                                    <p className="text-slate-400 mt-2">Agrega ítems adicionales a la lista y notifica al grupo Kamado Clandestina.</p>
-                                </div>
-                                {missingItems.length === 0 ? (
-                                    <button
-                                        disabled
-                                        className="bg-slate-700 text-slate-400 font-bold py-2 px-6 rounded-full flex items-center gap-2 cursor-not-allowed opacity-50"
                                     >
-                                        <div className="w-5 h-5 flex items-center justify-center">
-                                            <MessageSquare className="w-4 h-4" />
-                                        </div>
-                                        <span>Enviar Pedido (0)</span>
-                                    </button>
-                                ) : (
-                                    <a
-                                        href={`https://api.whatsapp.com/send?phone=51988945307&text=${encodeURIComponent(
-                                            `*FALTANTES COMANDA - ${new Date().toLocaleDateString('es-PE')}* 🚨\n\n` +
-                                            missingItems.map((item, index) =>
-                                                `${index + 1}. *${item.name}* (${item.quantity})\n   Solicitado por: ${item.requester}${item.price ? `\n   Ref: S/ ${item.price}` : ''}\n`
-                                            ).join('\n') +
-                                            `\n_Enviado desde Presupuesto Mix_`
-                                        )}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-full flex items-center gap-2 transition-all shadow-lg hover:shadow-emerald-500/20"
-                                    >
-                                        <div className="w-5 h-5 flex items-center justify-center">
-                                            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                                            </svg>
-                                        </div>
-                                        <span>Enviar Pedido ({missingItems.length})</span>
-                                    </a>
-                                )}
-                            </div>
-
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                {/* Form */}
-                                <div className="lg:col-span-1 bg-slate-950/50 p-6 rounded-2xl border border-slate-800">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Quién solicita</label>
-                                            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus-within:border-amber-500 transition-colors">
-                                                <User className="w-4 h-4 text-slate-500" />
-                                                <input
-                                                    type="text"
-                                                    placeholder="Tu nombre (ej. Chef Pepo)"
-                                                    className="bg-transparent w-full outline-none placeholder:text-slate-600"
-                                                    value={newItem.requester}
-                                                    onChange={(e) => setNewItem({ ...newItem, requester: e.target.value })}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Producto Faltante</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Ej. Carbón Extra"
-                                                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:border-amber-500 outline-none transition-colors"
-                                                value={newItem.name}
-                                                onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                                            />
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Cantidad</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Ej. 2 bolsas"
-                                                    className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:border-amber-500 outline-none transition-colors"
-                                                    value={newItem.quantity}
-                                                    onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Precio Ref. (S/)</label>
-                                                <input
-                                                    type="number"
-                                                    placeholder="0.00"
-                                                    className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:border-amber-500 outline-none transition-colors"
-                                                    value={newItem.price}
-                                                    onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <button
-                                            onClick={handleAddItem}
-                                            disabled={!newItem.name || !newItem.requester || isSending}
-                                            className="w-full bg-slate-800 hover:bg-amber-600 hover:text-white text-slate-300 font-bold py-3 rounded-xl transition-all flex justify-center items-center gap-2 mt-2"
-                                        >
-                                            {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                                            Agregar a la Lista
-                                        </button>
-
-                                        <AnimatePresence>
-                                            {addedSuccess && (
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: -10 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    exit={{ opacity: 0 }}
-                                                    className="bg-emerald-500/20 text-emerald-400 text-center text-sm font-bold py-2 rounded-lg border border-emerald-500/30"
-                                                >
-                                                    ¡Item agregado correctamente!
-                                                </motion.div>
+                                        <span className="relative z-10 flex items-center gap-2">
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
+                                                    <span>Analizando...</span>
+                                                </>
+                                            ) : isOptimized ? (
+                                                <>
+                                                    <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
+                                                    <span>Volver a Estándar</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
+                                                    <span>Optimizar con IA</span>
+                                                </>
                                             )}
-                                        </AnimatePresence>
-                                    </div>
+                                        </span>
+                                    </button>
                                 </div>
+                            </header>
 
-                                {/* List */}
-                                <div className="lg:col-span-2 space-y-3">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Items Pendientes</h3>
-                                        {missingItems.length > 0 && (
-                                            <button
-                                                onClick={handleClearList}
-                                                disabled={isClearing}
-                                                className="text-xs text-red-500 hover:text-red-400 font-bold underline transition-colors disabled:opacity-50"
-                                            >
-                                                {isClearing ? "Limpiando..." : "Limpiar Todo"}
-                                            </button>
-                                        )}
+                            {/* KPIs Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                                <KpiCard
+                                    title="Costo Total"
+                                    value={`S/ ${totalCost.toFixed(2)}`}
+                                    icon={<ShoppingCart className="w-6 h-6 text-blue-400" />}
+                                    trend={isOptimized ? `Ahorro: S/ ${savings.toFixed(2)}` : null}
+                                    isPositive={true}
+                                />
+                                <KpiCard
+                                    title="Costo por Adulto"
+                                    value={activePayingCount > 0 ? `S/ ${(totalCost / activePayingCount).toFixed(2)}` : "N/A"}
+                                    subtitle={`${activePayingCount} Pagantes (${activeTotalCount} Total)`}
+                                    icon={<Users className="w-6 h-6 text-purple-400" />}
+                                />
+                                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden">
+                                    <h3 className="text-slate-400 text-sm font-medium mb-4 z-10">Proyección de Ahorro</h3>
+                                    <div className="h-24 w-full z-10">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={chartData} layout="vertical">
+                                                <XAxis type="number" hide />
+                                                <YAxis dataKey="name" type="category" hide />
+                                                <Tooltip
+                                                    contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }}
+                                                    cursor={{ fill: 'transparent' }}
+                                                />
+                                                <Bar dataKey="amount" radius={[0, 4, 4, 0]} barSize={20}>
+                                                    {chartData.map((entry, index) => (
+                                                        <Cell key={`cell-${index}`} fill={index === 0 ? '#64748b' : '#10b981'} />
+                                                    ))}
+                                                </Bar>
+                                            </BarChart>
+                                        </ResponsiveContainer>
                                     </div>
-
-                                    {missingItems.length === 0 ? (
-                                        <div className="text-center py-10 border-2 border-dashed border-slate-800 rounded-2xl">
-                                            <p className="text-slate-600">No hay items faltantes reportados aún.</p>
-                                        </div>
-                                    ) : (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                                            {missingItems.slice().reverse().map((item: any) => (
-                                                <div key={item.id} className="bg-slate-950/30 p-4 rounded-xl border border-slate-800/50 flex flex-col justify-between group hover:border-amber-500/30 transition-colors">
-                                                    <div>
-                                                        <div className="flex justify-between items-start mb-2">
-                                                            <span className="font-bold text-slate-200 text-lg">{item.name}</span>
-                                                            {item.price && <span className="bg-slate-900 text-xs font-mono px-2 py-1 rounded text-slate-400">S/ {item.price}</span>}
-                                                        </div>
-                                                        <p className="text-sm text-slate-400 mb-1">Cantidad: <span className="text-slate-300 ml-1">{item.quantity}</span></p>
-                                                    </div>
-                                                    <div className="mt-3 pt-3 border-t border-slate-800/50 flex justify-between items-center text-xs">
-                                                        <span className="text-slate-500 flex items-center gap-1">
-                                                            <User className="w-3 h-3 text-amber-500" />
-                                                            <span className="text-amber-500 font-bold">{item.requester}</span>
-                                                        </span>
-                                                        <span className="text-slate-600">{new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                    {/* Abstract BG decoration */}
+                                    <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl"></div>
                                 </div>
                             </div>
+
+                            {/* Main Content Layout */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                                {/* Left Column: Dish List */}
+                                <div className="lg:col-span-2 space-y-4">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h2 className="text-2xl font-bold text-slate-200 flex items-center gap-2">
+                                            <Store className="w-6 h-6 text-amber-500" />
+                                            Detalle de Comanda
+                                        </h2>
+                                        <div className="text-xs text-slate-500 italic">
+                                            * Puedes editar cantidades y precios directamente
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        {currentData.map((dish) => (
+                                            <DishRow
+                                                key={dish.id}
+                                                dish={dish}
+                                                isExpanded={expandedDish === dish.id}
+                                                onToggle={() => setExpandedDish(expandedDish === dish.id ? null : dish.id)}
+                                                isOptimized={isOptimized}
+                                                onUpdate={handleUpdateIngredient}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Right Column: Market Analysis (Visible only when optimized) */}
+                                <div className="lg:col-span-1 space-y-8">
+                                    <AnimatePresence>
+                                        {isOptimized && (
+                                            <motion.div
+                                                initial={{ opacity: 0, x: 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: 20 }}
+                                                className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sticky top-8"
+                                            >
+                                                <h3 className="text-xl font-bold text-emerald-400 mb-6 flex items-center gap-2">
+                                                    <TrendingDown className="w-6 h-6" />
+                                                    Mejores Opciones
+                                                </h3>
+
+                                                <div className="space-y-6">
+                                                    <div className="p-4 bg-emerald-900/20 border border-emerald-500/30 rounded-xl">
+                                                        <p className="text-emerald-300 text-sm mb-1">Ahorro Total Estimado</p>
+                                                        <p className="text-3xl font-bold text-emerald-400">S/ {savings.toFixed(2)}</p>
+                                                        <p className="text-xs text-emerald-500/80 mt-2">Reducción del {originalCost > 0 ? ((savings / originalCost) * 100).toFixed(1) : 0}%</p>
+                                                    </div>
+
+                                                    <div>
+                                                        <h4 className="text-slate-400 text-sm font-semibold mb-3 uppercase tracking-wider">Dónde comprar</h4>
+                                                        <div className="space-y-3">
+                                                            {marketBreakdown.sort((a, b) => b.value - a.value).map((market) => (
+                                                                <div key={market.name} className="flex justify-between items-center group">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-2 h-2 rounded-full bg-slate-600 group-hover:bg-amber-500 transition-colors"></div>
+                                                                        <span className="text-slate-300">{market.name}</span>
+                                                                    </div>
+                                                                    <span className="font-mono text-slate-400">S/ {market.value.toFixed(2)}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="pt-6 border-t border-slate-800">
+                                                        <p className="text-xs text-slate-500 italic">
+                                                            * Precios referenciales comparados con base de datos histórica de mercados locales.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                        {!isOptimized && (
+                                            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 text-center flex flex-col items-center justify-center h-64 border-dashed">
+                                                <Sparkles className="w-12 h-12 text-slate-700 mb-4" />
+                                                <p className="text-slate-500">Activa la IA para ver el análisis de mercado</p>
+                                            </div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                            </div>
+
+                            {isOptimized && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 30 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="mt-12"
+                                >
+                                    <ComparativeMarketAnalysis data={currentData} />
+                                </motion.div>
+                            )}
+
+                            {/* Missing Items Section */}
+                            <div className="mt-16 bg-slate-900 border border-slate-800 rounded-3xl p-8 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-amber-500"></div>
+
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
+                                            <span className="bg-red-500/20 text-red-400 p-2 rounded-lg">
+                                                <MessageSquare className="w-6 h-6" />
+                                            </span>
+                                            ¿Faltó Algo?
+                                        </h2>
+                                        <p className="text-slate-400 mt-2">Agrega ítems adicionales a la lista y notifica al grupo Kamado Clandestina.</p>
+                                    </div>
+                                    {missingItems.length === 0 ? (
+                                        <button
+                                            disabled
+                                            className="bg-slate-700 text-slate-400 font-bold py-2 px-6 rounded-full flex items-center gap-2 cursor-not-allowed opacity-50"
+                                        >
+                                            <div className="w-5 h-5 flex items-center justify-center">
+                                                <MessageSquare className="w-4 h-4" />
+                                            </div>
+                                            <span>Enviar Pedido (0)</span>
+                                        </button>
+                                    ) : (
+                                        <a
+                                            href={`https://api.whatsapp.com/send?phone=51988945307&text=${encodeURIComponent(
+                                                `*FALTANTES COMANDA - ${new Date().toLocaleDateString('es-PE')}* 🚨\n\n` +
+                                                missingItems.map((item, index) =>
+                                                    `${index + 1}. *${item.name}* (${item.quantity})\n   Solicitado por: ${item.requester}${item.price ? `\n   Ref: S/ ${item.price}` : ''}\n`
+                                                ).join('\n') +
+                                                `\n_Enviado desde Presupuesto Mix_`
+                                            )}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-full flex items-center gap-2 transition-all shadow-lg hover:shadow-emerald-500/20"
+                                        >
+                                            <div className="w-5 h-5 flex items-center justify-center">
+                                                <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                                                </svg>
+                                            </div>
+                                            <span>Enviar Pedido ({missingItems.length})</span>
+                                        </a>
+                                    )}
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                    {/* Form */}
+                                    <div className="lg:col-span-1 bg-slate-950/50 p-6 rounded-2xl border border-slate-800">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Quién solicita</label>
+                                                <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus-within:border-amber-500 transition-colors">
+                                                    <User className="w-4 h-4 text-slate-500" />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Tu nombre (ej. Chef Pepo)"
+                                                        className="bg-transparent w-full outline-none placeholder:text-slate-600"
+                                                        value={newItem.requester}
+                                                        onChange={(e) => setNewItem({ ...newItem, requester: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Producto Faltante</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Ej. Carbón Extra"
+                                                    className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:border-amber-500 outline-none transition-colors"
+                                                    value={newItem.name}
+                                                    onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Cantidad</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Ej. 2 bolsas"
+                                                        className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:border-amber-500 outline-none transition-colors"
+                                                        value={newItem.quantity}
+                                                        onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Precio Ref. (S/)</label>
+                                                    <input
+                                                        type="number"
+                                                        placeholder="0.00"
+                                                        className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:border-amber-500 outline-none transition-colors"
+                                                        value={newItem.price}
+                                                        onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                onClick={handleAddItem}
+                                                disabled={!newItem.name || !newItem.requester || isSending}
+                                                className="w-full bg-slate-800 hover:bg-amber-600 hover:text-white text-slate-300 font-bold py-3 rounded-xl transition-all flex justify-center items-center gap-2 mt-2"
+                                            >
+                                                {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                                                Agregar a la Lista
+                                            </button>
+
+                                            <AnimatePresence>
+                                                {addedSuccess && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: -10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        exit={{ opacity: 0 }}
+                                                        className="bg-emerald-500/20 text-emerald-400 text-center text-sm font-bold py-2 rounded-lg border border-emerald-500/30"
+                                                    >
+                                                        ¡Item agregado correctamente!
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
+                                    </div>
+
+                                    {/* List */}
+                                    <div className="lg:col-span-2 space-y-3">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Items Pendientes</h3>
+                                            {missingItems.length > 0 && (
+                                                <button
+                                                    onClick={handleClearList}
+                                                    disabled={isClearing}
+                                                    className="text-xs text-red-500 hover:text-red-400 font-bold underline transition-colors disabled:opacity-50"
+                                                >
+                                                    {isClearing ? "Limpiando..." : "Limpiar Todo"}
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {missingItems.length === 0 ? (
+                                            <div className="text-center py-10 border-2 border-dashed border-slate-800 rounded-2xl">
+                                                <p className="text-slate-600">No hay items faltantes reportados aún.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                                {missingItems.slice().reverse().map((item: any) => (
+                                                    <div key={item.id} className="bg-slate-950/30 p-4 rounded-xl border border-slate-800/50 flex flex-col justify-between group hover:border-amber-500/30 transition-colors">
+                                                        <div>
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <span className="font-bold text-slate-200 text-lg">{item.name}</span>
+                                                                {item.price && <span className="bg-slate-900 text-xs font-mono px-2 py-1 rounded text-slate-400">S/ {item.price}</span>}
+                                                            </div>
+                                                            <p className="text-sm text-slate-400 mb-1">Cantidad: <span className="text-slate-300 ml-1">{item.quantity}</span></p>
+                                                        </div>
+                                                        <div className="mt-3 pt-3 border-t border-slate-800/50 flex justify-between items-center text-xs">
+                                                            <span className="text-slate-500 flex items-center gap-1">
+                                                                <User className="w-3 h-3 text-amber-500" />
+                                                                <span className="text-amber-500 font-bold">{item.requester}</span>
+                                                            </span>
+                                                            <span className="text-slate-600">{new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
 
-                    </div>
+                    </motion.div>
+                )}
 
-                </motion.div>
-            )}
-        </AnimatePresence>
+            </AnimatePresence>
+
+            <ParticipantsModal
+                isOpen={showParticipantsModal}
+                onClose={() => setShowParticipantsModal(false)}
+                participants={participants}
+                onToggle={handleToggleParticipant}
+                totalCost={totalCost}
+                activePayingCount={activePayingCount}
+            />
+        </>
     );
 }
 
@@ -1016,6 +1028,144 @@ function IngredientRow({
 }
 
 
+
+
+function ParticipantsModal({
+    isOpen,
+    onClose,
+    participants,
+    onToggle,
+    totalCost,
+    activePayingCount
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    participants: Participant[];
+    onToggle: (id: string) => void;
+    totalCost: number;
+    activePayingCount: number;
+}) {
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+                        onClick={onClose}
+                    />
+                    <motion.div
+                        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                        className="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col z-10"
+                    >
+                        <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900 z-10">
+                            <h3 className="text-lg font-bold text-slate-200 flex items-center gap-2">
+                                <Users className="w-5 h-5 text-amber-500" />
+                                Gestionar Invitados
+                            </h3>
+                            <button
+                                onClick={onClose}
+                                className="p-1 hover:bg-slate-800 rounded-full transition-colors text-slate-400 hover:text-white"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
+                            <div className="space-y-2">
+                                {participants.map((p) => (
+                                    <div
+                                        key={p.id}
+                                        onClick={() => onToggle(p.id)}
+                                        className={`
+                                        flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border group select-none
+                                        ${p.isActive
+                                                ? 'bg-slate-800/80 border-slate-700 hover:bg-slate-800'
+                                                : 'bg-slate-950/50 border-transparent opacity-60 hover:opacity-100'
+                                            }
+                                    `}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className={`
+                                                w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors
+                                                ${p.isActive ? 'bg-amber-500 border-amber-500' : 'border-slate-600 group-hover:border-slate-500'}
+                                            `}>
+                                                {p.isActive && <Check className="w-4 h-4 text-slate-900 stroke-[3]" />}
+                                            </div>
+
+                                            <div className="flex items-center gap-3">
+                                                <div className={`
+                                                    w-10 h-10 rounded-full flex items-center justify-center border
+                                                    ${p.isActive
+                                                        ? (p.type === 'Adulto' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-blue-500/10 border-blue-500/30 text-blue-400')
+                                                        : 'bg-slate-800 border-slate-700 text-slate-600'}
+                                                `}>
+                                                    {p.type === 'Niño' ? <Baby className="w-5 h-5" /> : <User className="w-5 h-5" />}
+                                                </div>
+                                                <div>
+                                                    <p className={`font-bold text-base ${p.isActive ? 'text-slate-100' : 'text-slate-500'}`}>{p.name}</p>
+                                                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500 flex items-center gap-1">
+                                                        {p.type}
+                                                        {p.isActive && (
+                                                            <span className={p.type === 'Adulto' ? 'text-emerald-500' : 'text-blue-500'}>
+                                                                • {p.type === 'Adulto' ? 'Participa y Paga' : 'Participa Gratis'}
+                                                            </span>
+                                                        )}
+                                                        {!p.isActive && <span className="text-slate-600">• No Participa</span>}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-right">
+                                            {p.isActive ? (
+                                                p.type === 'Adulto' ? (
+                                                    <div className="text-emerald-400 font-bold text-sm bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
+                                                        S/ {activePayingCount > 0 ? (totalCost / activePayingCount).toFixed(2) : '0.00'}
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-blue-400 font-bold text-xs bg-blue-500/10 px-2 py-1 rounded-md border border-blue-500/20">
+                                                        S/ 0.00
+                                                    </div>
+                                                )
+                                            ) : (
+                                                <div className="text-slate-600 font-bold text-xs px-2 py-1">
+                                                    --
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="p-4 bg-slate-900 border-t border-slate-800 text-center space-y-2">
+                            <div className="flex justify-between items-center text-sm px-2">
+                                <span className="text-slate-400">Total a Dividir:</span>
+                                <span className="text-slate-200 font-bold">S/ {totalCost.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm px-2">
+                                <span className="text-slate-400">Entre Adultos ({activePayingCount}):</span>
+                                <span className="text-emerald-400 font-bold text-lg">S/ {activePayingCount > 0 ? (totalCost / activePayingCount).toFixed(2) : '0.00'} c/u</span>
+                            </div>
+
+                            <div className="mt-4 pt-3 border-t border-slate-800/50">
+                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center justify-center gap-2">
+                                    <Baby className="w-4 h-4 text-blue-400" />
+                                    <span>Los Niños NO Pagan</span>
+                                </p>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+        </AnimatePresence>
+    );
+}
 
 function BudgetTicker({ data }: { data: Dish[] }) {
     // Generate ticker items: Flattened view of dish totals
