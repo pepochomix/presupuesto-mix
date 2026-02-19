@@ -77,20 +77,7 @@ export const budgetData: Dish[] = [
             { id: "i3-6", name: "Miel de Abeja", quantity: 1, unit: "200 gr", priceUnit: 8.00, priceTotal: 8.00, marketPrices: generateMarketPrices(8.00) },
         ]
     },
-    {
-        id: "dish-4",
-        name: "Ensalada de Col",
-        image: "https://images.unsplash.com/photo-1629858607106-a833534d0263?q=80&w=600&auto=format&fit=crop",
-        ingredients: [
-            { id: "i4-1", name: "Col Grande", quantity: 1, unit: "Kilos", priceUnit: 3.50, priceTotal: 3.50, observations: "Viernes 20% descuento", marketPrices: generateMarketPrices(3.50) },
-            { id: "i4-2", name: "Piña Golden", quantity: 1, unit: "Frasco", priceUnit: 13.00, priceTotal: 13.00, observations: "Costo Para Sazonar Chancho y comer con chorizos etc", marketPrices: generateMarketPrices(13.00) },
-            { id: "i4-3", name: "Pecanas", quantity: 1, unit: "200 gr", priceUnit: 8.00, priceTotal: 8.00, marketPrices: generateMarketPrices(8.00) },
-            { id: "i4-9", name: "Queso cortado edan", quantity: 1, unit: "50 gr", priceUnit: 15.00, priceTotal: 15.00, marketPrices: generateMarketPrices(15.00) },
-            { id: "i4-10", name: "Tocino", quantity: 1, unit: "100 gr", priceUnit: 10.00, priceTotal: 10.00, marketPrices: generateMarketPrices(10.00) },
-            { id: "i4-11", name: "Pasas Negras", quantity: 1, unit: "120 gr", priceUnit: 6.00, priceTotal: 6.00, marketPrices: generateMarketPrices(6.00) },
-            { id: "i4-12", name: "Yogurt Natural / Mayonesa", quantity: 1, unit: "Frasco", priceUnit: 12.00, priceTotal: 12.00, observations: "Base para aliño", marketPrices: generateMarketPrices(12.00) },
-        ]
-    },
+
     {
         id: "dish-5",
         name: "Piqueos y Otros",
