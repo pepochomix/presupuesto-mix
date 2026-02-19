@@ -19,8 +19,6 @@ import {
     Send,
     Plus,
     MessageSquare,
-    User
-    MessageSquare,
     User,
     UserCheck,
     UserMinus,
