@@ -98,3 +98,27 @@ export async function getFailedItems() {
         }
     }
 }
+
+export async function clearFailedItems() {
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+        // PRODUCTION: Clear Vercel KV
+        try {
+            await kv.del(KV_KEY);
+            return { success: true };
+        } catch (error) {
+            console.error("Error clearing KV:", error);
+            return { success: false, error: 'Failed to clear KV' };
+        }
+    } else {
+        // DEVELOPMENT: Clear Local JSON File
+        try {
+            if (fs.existsSync(DB_FILE)) {
+                fs.writeFileSync(DB_FILE, '[]');
+            }
+            return { success: true };
+        } catch (error) {
+            console.error("Error clearing local DB:", error);
+            return { success: false, error: 'Failed to clear local DB' };
+        }
+    }
+}

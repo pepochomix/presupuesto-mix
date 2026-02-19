@@ -20,7 +20,7 @@ import {
     MessageSquare,
     User
 } from "lucide-react";
-import { saveFailedItem, getFailedItems } from "@/app/db";
+import { saveFailedItem, getFailedItems, clearFailedItems } from "@/app/db";
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
     AreaChart, Area, CartesianGrid, Legend, ComposedChart, Line
@@ -47,6 +47,7 @@ export default function BudgetDashboard() {
     const [newItem, setNewItem] = useState({ name: '', quantity: '', price: '', requester: '' });
     const [isSending, setIsSending] = useState(false);
     const [addedSuccess, setAddedSuccess] = useState(false);
+    const [isClearing, setIsClearing] = useState(false);
 
     // Load initial missing items on mount
     useEffect(() => {
@@ -91,6 +92,24 @@ export default function BudgetDashboard() {
             console.error("Error syncing to server:", error);
         } finally {
             setIsSending(false);
+        }
+    };
+
+    const handleClearList = async () => {
+        if (!confirm("¿Estás seguro de querer limpiar toda la lista de faltantes?")) return;
+
+        setIsClearing(true);
+        try {
+            // Clear Local Storage
+            localStorage.removeItem('missingItems');
+            setMissingItems([]);
+
+            // Clear Server DB
+            await clearFailedItems();
+        } catch (error) {
+            console.error("Error clearing list:", error);
+        } finally {
+            setIsClearing(false);
         }
     };
 
@@ -581,7 +600,18 @@ export default function BudgetDashboard() {
 
                                 {/* List */}
                                 <div className="lg:col-span-2 space-y-3">
-                                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Items Pendientes</h3>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Items Pendientes</h3>
+                                        {missingItems.length > 0 && (
+                                            <button
+                                                onClick={handleClearList}
+                                                disabled={isClearing}
+                                                className="text-xs text-red-500 hover:text-red-400 font-bold underline transition-colors disabled:opacity-50"
+                                            >
+                                                {isClearing ? "Limpiando..." : "Limpiar Todo"}
+                                            </button>
+                                        )}
+                                    </div>
 
                                     {missingItems.length === 0 ? (
                                         <div className="text-center py-10 border-2 border-dashed border-slate-800 rounded-2xl">
