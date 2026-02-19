@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { budgetData, Dish, Ingredient } from "@/data/budgetData";
+import { INITIAL_PARTICIPANTS, Participant } from "@/data/participants";
 import {
     Calculator,
     ShoppingCart,
@@ -19,6 +20,13 @@ import {
     Plus,
     MessageSquare,
     User
+    MessageSquare,
+    User,
+    UserCheck,
+    UserMinus,
+    Baby,
+    X,
+    Check
 } from "lucide-react";
 import { saveFailedItem, getFailedItems, clearFailedItems } from "@/app/db";
 import {
@@ -137,7 +145,24 @@ export default function BudgetDashboard() {
     const [hasFetchedAI, setHasFetchedAI] = useState(false);
 
     // Editable State
-    const [peopleCount, setPeopleCount] = useState(INITIAL_PEOPLE_COUNT);
+    // const [peopleCount, setPeopleCount] = useState(INITIAL_PEOPLE_COUNT); // Deprecated
+    const [participants, setParticipants] = useState<Participant[]>(INITIAL_PARTICIPANTS);
+    const [showParticipantsModal, setShowParticipantsModal] = useState(false);
+
+    const activePayingCount = useMemo(() => {
+        return participants.filter(p => p.isActive && p.type === 'Adulto').length;
+    }, [participants]);
+
+    const activeTotalCount = useMemo(() => {
+        return participants.filter(p => p.isActive).length;
+    }, [participants]);
+
+    const handleToggleParticipant = (id: string) => {
+        setParticipants(prev => prev.map(p => {
+            if (p.id === id) return { ...p, isActive: !p.isActive };
+            return p;
+        }));
+    };
 
     // Handlers for editing
     const handleUpdateIngredient = (dishId: string, ingredientId: string, field: keyof Ingredient | 'discount', value: number) => {
@@ -297,16 +322,22 @@ export default function BudgetDashboard() {
 
                             <div className="flex flex-wrap justify-center items-center gap-4 w-full md:w-auto">
                                 {/* People Count Edit */}
-                                <div className="bg-slate-900 border border-slate-700 rounded-full px-4 py-2 flex items-center gap-2 shadow-lg">
-                                    <Users className="w-4 h-4 text-purple-400" />
-                                    <span className="text-xs text-slate-400 font-medium">Personas:</span>
-                                    <input
-                                        type="number"
-                                        value={peopleCount}
-                                        onChange={(e) => setPeopleCount(Math.max(1, parseInt(e.target.value) || 0))}
-                                        className="w-12 bg-transparent text-lg font-bold text-slate-100 outline-none text-center focus:text-purple-400 transition-colors"
-                                    />
-                                </div>
+                                <button
+                                    onClick={() => setShowParticipantsModal(true)}
+                                    className="bg-slate-900 border border-slate-700 hover:border-amber-500 rounded-full px-4 py-2 flex items-center gap-2 shadow-lg transition-colors group"
+                                >
+                                    <Users className="w-5 h-5 text-purple-400 group-hover:text-amber-400 transition-colors" />
+                                    <div className="flex flex-col items-start leading-none text-left">
+                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Comensales</span>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-sm font-bold text-slate-200">{activeTotalCount} Total</span>
+                                            <span className="text-xs text-slate-500">/</span>
+                                            <span className="text-sm font-bold text-emerald-400">{activePayingCount} Pagan</span>
+                                        </div>
+                                    </div>
+                                    <ChevronDown className="w-4 h-4 text-slate-600" />
+                                </button>
+
 
                                 <button
                                     onClick={toggleOptimization}
@@ -351,9 +382,9 @@ export default function BudgetDashboard() {
                                 isPositive={true}
                             />
                             <KpiCard
-                                title="Costo por Persona"
-                                value={`S/ ${(totalCost / peopleCount).toFixed(2)}`}
-                                subtitle={`${peopleCount} Personas`}
+                                title="Costo por Adulto"
+                                value={activePayingCount > 0 ? `S/ ${(totalCost / activePayingCount).toFixed(2)}` : "N/A"}
+                                subtitle={`${activePayingCount} Pagantes (${activeTotalCount} Total)`}
                                 icon={<Users className="w-6 h-6 text-purple-400" />}
                             />
                             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden">
