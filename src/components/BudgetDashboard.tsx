@@ -172,19 +172,10 @@ export default function BudgetDashboard() {
 
     const toggleRecording = () => {
         if (isRecording) {
-            // Stop logic handles by the onend event usually, but here we force stop if needed
-            // Actually, best way is to let the recognition object stop.
-            // But since I don't want to store the "recognition" instance in state (it's non-serializable),
-            // I will initiate it on click if not recording.
-            // If ALREADY recording, I just want it to stop.
-            // Limitation: If I don't have the instance reference, I can't call .stop().
-            // So I should keep a ref.
-
-            // To keep simple: Only allow STARTING manually. It stops automatically or on silence.
-            // Or I can store it in a Ref.
+            if (recognitionRef.current) {
+                recognitionRef.current.stop();
+            }
             setIsRecording(false);
-            window.location.reload(); // Hard stop for now as quick fix or use ref properly.
-            // Let's implement Ref pattern below.
         } else {
             startListening();
         }
@@ -194,7 +185,7 @@ export default function BudgetDashboard() {
 
     const startListening = () => {
         if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            alert("Tu navegador no soporta reconocimiento de voz.");
+            alert("Tu navegador no soporta reconocimiento de voz. Intenta usar Chrome o Safari.");
             return;
         }
 
@@ -204,28 +195,46 @@ export default function BudgetDashboard() {
         recognition.lang = 'es-PE';
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
+        recognition.continuous = false; // Ensure single command mode
 
         recognition.onstart = () => {
+            console.log("Voice recognition started");
             setIsRecording(true);
         };
 
         recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
             console.log("Escuchado:", transcript);
-            handleVoiceSuccess(transcript);
+            if (transcript) {
+                handleVoiceSuccess(transcript);
+            }
         };
 
         recognition.onerror = (event: any) => {
             console.error("Speech error", event.error);
             setIsRecording(false);
+
+            let msg = "Error en reconocimiento de voz.";
+            if (event.error === 'not-allowed') {
+                msg = "Permiso de micrófono denegado. Habilítalo en tu navegador.";
+            } else if (event.error === 'no-speech') {
+                msg = "No se escuchó nada. Intenta hablar más fuerte.";
+            } else if (event.error === 'network') {
+                msg = "Error de red. Verifica tu conexión.";
+            }
+            // Only alert on critical errors, ignore 'no-speech' spam if continuous (not the case here)
+            if (event.error !== 'no-speech') {
+                alert(msg);
+            }
         };
 
         recognition.onend = () => {
-            // If stopped without result, just reset state
-            // But if specific processed, handleVoiceSuccess does the state reset.
-            // We can check isProcessingVoice but that state update might be delayed.
-            // Safest is to just setRecording false here if not already handled.
-            if (!isProcessingVoice) setIsRecording(false);
+            console.log("Voice recognition ended");
+            // Only reset if we are NOT processing a result
+            // If isProcessingVoice is true, it means we got a result and are waiting for AI
+            if (!isProcessingVoice) {
+                setIsRecording(false);
+            }
         };
 
         recognitionRef.current = recognition;
