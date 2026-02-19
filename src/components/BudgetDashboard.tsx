@@ -41,8 +41,30 @@ import { optimizeBudgetWithAI } from "@/app/actions";
 import { motion, AnimatePresence } from "framer-motion";
 
 const INITIAL_PEOPLE_COUNT = 10;
+const APP_VERSION = '1.0.1'; // Increment this to force update
 
 export default function BudgetDashboard() {
+    // Force Cache Busting on Version Change
+    useEffect(() => {
+        const storedVersion = localStorage.getItem('app_version');
+        if (storedVersion !== APP_VERSION) {
+            console.log("New version detected. Clearing cache...");
+            localStorage.clear(); // Clear old data
+
+            // Unregister Service Workers to force update
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+
+            localStorage.setItem('app_version', APP_VERSION);
+            window.location.reload();
+        }
+    }, []);
+
     const [currentData, setCurrentData] = useState<Dish[]>(budgetData);
     const [isOptimized, setIsOptimized] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
