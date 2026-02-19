@@ -905,46 +905,46 @@ function IngredientRow({
             </div>
 
             {/* Editable Quantity */}
-            <div className="col-span-3 flex justify-center">
-                <div className="flex items-center gap-1 bg-slate-950/50 rounded-md px-2 py-1 border border-slate-800 focus-within:border-amber-500 transition-colors w-full max-w-[100px]">
+            <div className="col-span-2 flex justify-center">
+                <div className="flex items-center gap-1 bg-slate-950/50 rounded-md px-1 py-1 border border-slate-800 focus-within:border-amber-500 transition-colors w-full">
                     <input
                         type="number"
-                        className="w-full bg-transparent text-center outline-none text-slate-300 min-w-0"
+                        className="w-full bg-transparent text-center outline-none text-slate-300 min-w-0 text-xs md:text-sm"
                         value={ingredient.quantity}
                         onChange={(e) => onUpdate('quantity', parseFloat(e.target.value) || 0)}
                     />
-                    <span className="text-xs text-slate-500 truncate shrink-0">{ingredient.unit}</span>
+                    <span className="text-[10px] md:text-xs text-slate-500 truncate shrink-0">{ingredient.unit}</span>
                 </div>
             </div>
 
             {/* Editable Unit Price */}
             <div className="col-span-2 text-right flex justify-end flex-col items-end">
-                <div className="flex items-center gap-1 bg-slate-950/50 rounded-md px-2 py-1 border border-slate-800 focus-within:border-amber-500 transition-colors max-w-[100px]">
-                    <span className="text-slate-500 text-xs">S/</span>
+                <div className="flex items-center gap-1 bg-slate-950/50 rounded-md px-1 py-1 border border-slate-800 focus-within:border-amber-500 transition-colors w-full">
+                    <span className="text-slate-500 text-[10px]">S/</span>
                     <input
                         type="number"
-                        className={`w-full bg-transparent text-right outline-none font-mono ${isCheaper ? 'text-slate-400 line-through text-xs' : 'text-slate-300'}`}
+                        className={`w-full bg-transparent text-right outline-none font-mono text-xs md:text-sm ${isCheaper ? 'text-slate-400 line-through' : 'text-slate-300'}`}
                         value={ingredient.priceUnit}
                         onChange={(e) => onUpdate('priceUnit', parseFloat(e.target.value) || 0)}
                     />
                 </div>
-                {isCheaper && <div className="text-xs text-emerald-400 font-mono mt-1">{bestPrice.toFixed(2)}</div>}
+                {isCheaper && <div className="text-[10px] text-emerald-400 font-mono mt-0.5">{bestPrice.toFixed(2)}</div>}
             </div>
 
             {/* Editable Total Price */}
             <div className="col-span-3 text-right flex flex-col items-end justify-center">
-                <div className={`flex items-center gap-1 rounded-md px-2 py-1 border transition-colors max-w-[100px] ${hasDiscount ? 'bg-red-900/20 border-red-500 text-red-500' : 'bg-slate-950/50 border-slate-800 focus-within:border-amber-500'}`}>
-                    <span className={`text-xs ${hasDiscount ? 'text-red-500/70' : 'text-slate-500'}`}>S/</span>
+                <div className={`flex items-center gap-1 rounded-md px-1 py-1 border transition-colors w-full ${hasDiscount ? 'bg-red-900/20 border-red-500 text-red-500' : 'bg-slate-950/50 border-slate-800 focus-within:border-amber-500'}`}>
+                    <span className={`text-[10px] ${hasDiscount ? 'text-red-500/70' : 'text-slate-500'}`}>S/</span>
                     <input
                         type="number"
-                        className={`w-full bg-transparent text-right outline-none font-mono font-bold ${hasDiscount ? 'text-red-400' : isCheaper ? 'text-emerald-400' : 'text-slate-200'}`}
+                        className={`w-full bg-transparent text-right outline-none font-mono font-bold text-xs md:text-sm ${hasDiscount ? 'text-red-400' : isCheaper ? 'text-emerald-400' : 'text-slate-200'}`}
                         value={finalTotal.toFixed(2)}
                         onChange={(e) => onUpdate('priceTotal', parseFloat(e.target.value) || 0)}
                     />
                 </div>
                 {hasDiscount && (
-                    <div className="text-[10px] text-red-400 mt-1 font-bold animate-pulse">
-                        - S/ {(displayTotal - finalTotal).toFixed(2)} Ahorro
+                    <div className="text-[9px] text-red-400 mt-0.5 font-bold animate-pulse">
+                        - S/ {(displayTotal - finalTotal).toFixed(2)}
                     </div>
                 )}
             </div>
