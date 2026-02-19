@@ -45,7 +45,7 @@ import { optimizeBudgetWithAI, generateMenuAction, parseVoiceCommand } from "@/a
 import { motion, AnimatePresence } from "framer-motion";
 
 const INITIAL_PEOPLE_COUNT = 10;
-const APP_VERSION = '1.0.1'; // Increment this to force update
+const APP_VERSION = '1.0.2'; // Increment this to force update
 
 export default function BudgetDashboard() {
     // Force Cache Busting on Version Change
