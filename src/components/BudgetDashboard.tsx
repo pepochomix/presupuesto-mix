@@ -867,10 +867,11 @@ function IngredientRow({
 
     const displayTotal = isCheaper ? (bestPrice * ingredient.quantity) : ingredient.priceTotal;
 
-    // Logic for Discount (Special Case for Panceta)
     const canHaveDiscount = ingredient.name.toLowerCase().includes("panceta de cerdo");
     const hasDiscount = (ingredient.discount || 0) > 0;
     const finalTotal = displayTotal * (hasDiscount ? (1 - (ingredient.discount || 0) / 100) : 1);
+
+    const [isFocused, setIsFocused] = useState(false);
 
     return (
         <div className={`grid grid-cols-12 items-center p-3 rounded-lg text-sm gap-2 transition-colors duration-300 ${isCheaper ? 'bg-emerald-900/10 border border-emerald-500/20' : hasDiscount ? 'bg-red-900/10 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'hover:bg-slate-800/30 group'}`}>
@@ -923,9 +924,12 @@ function IngredientRow({
                     <span className="text-slate-500 text-[10px]">S/</span>
                     <input
                         type="number"
+                        step="0.01"
                         className={`w-full bg-transparent text-right outline-none font-mono text-xs md:text-sm ${isCheaper ? 'text-slate-400 line-through' : 'text-slate-300'}`}
-                        value={ingredient.priceUnit}
+                        value={isFocused ? ingredient.priceUnit : Number(ingredient.priceUnit).toFixed(2)}
                         onChange={(e) => onUpdate('priceUnit', parseFloat(e.target.value) || 0)}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
                     />
                 </div>
                 {isCheaper && <div className="text-[10px] text-emerald-400 font-mono mt-0.5">{bestPrice.toFixed(2)}</div>}
