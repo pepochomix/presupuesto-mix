@@ -100,3 +100,122 @@ export async function optimizeBudgetWithAI(currentDishes: Dish[]) {
         return currentDishes;
     }
 }
+
+export async function generateMenuAction(budget: number, people: number, preference: string) {
+    if (!apiKey) {
+        console.error("No API Key found");
+        return null; // Return null to signal no API key
+    }
+
+    try {
+        const prompt = `
+      Actúa como un Chef Ejecutivo y experto en costos de eventos en Lima, Perú.
+      Necesito armar un menú completo (varios platos/categorías) para un evento con las siguientes restricciones:
+
+      - Presupuesto TOTAL aprox: S/ ${budget}
+      - Cantidad de Personas: ${people}
+      - Preferencia/Estilo: ${preference} (ej. Parrilla, Criollo, Marino, Económico, etc.)
+
+      Genera una lista de compras detallada estructurada como platos (Dish) e ingredientes (Ingredient).
+      
+      Reglas:
+      1. Calcula cantidades realistas para que alcance para ${people} personas.
+      2. Usa precios de mercado actuales de Lima (Soles PEN).
+      3. El costo total de TODOS los ingredientes sumados debe acercarse al presupuesto, pero NO excederlo por mucho.
+      4. Incluye "Insumos Básicos" (carbón, hielo, bebidas) si aplica al estilo.
+      5. NO expliques, solo dame el JSON.
+
+      Devuelve SOLO un JSON array de objetos 'Dish'. Estructura exacta:
+      [
+        {
+          "id": "generado-1",
+          "name": "Nombre del Plato o Categoría (ej. Entrada, Fondo, Bebidas)",
+          "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1", 
+          "ingredients": [
+            {
+              "id": "ing-gen-1",
+              "name": "Nombre ingrediente",
+              "quantity": 0,
+              "unit": "kg/unid/lt",
+              "priceUnit": 0.00,
+              "priceTotal": 0.00,
+              "observations": "Notas opcionales",
+              "marketPrices": []
+            }
+          ]
+        }
+      ]
+      
+      IMPORTANTE:
+      - priceTotal debe ser quantity * priceUnit.
+      - marketPrices puede estar vacío [].
+      - Genera al menos 2 o 3 categorías (ej. Fondo, Acompañamientos, Bebidas).
+    `;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        let text = response.text();
+
+        // Extract JSON if wrapped in markdown
+        if (text.includes('```json')) {
+            text = text.split('```json')[1].split('```')[0];
+        } else if (text.includes('```')) {
+            text = text.split('```')[1].split('```')[0];
+        }
+
+        const data = JSON.parse(text.trim());
+        return data;
+
+    } catch (error) {
+        console.error("Error generating menu:", error);
+        throw new Error("Failed to generate menu");
+    }
+}
+
+export async function parseVoiceCommand(text: string) {
+    if (!apiKey) {
+        console.error("No API Key found");
+        return null;
+    }
+
+    try {
+        const prompt = `
+            Actúa como un asistente de compras inteligente para una parrilla/evento.
+            Analiza el siguiente texto de voz: "${text}"
+
+            Extrae los ítems que se quieren AGREGAR a la lista de faltantes.
+            
+            Devuelve un JSON con la siguiente estructura:
+            {
+                "items": [
+                    {
+                        "name": "nombre del producto (ej. Hielo, Inka Cola)",
+                        "quantity": number, // siempre numérico
+                        "requester": "nombre de quien pide (si no dice, poner 'Voz')"
+                    }
+                ]
+            }
+
+            Reglas:
+            - Extrae múltiples ítems si existen.
+            - Si la cantidad es en texto ("dos"), conviértela a número (2).
+            - Si no menciona cantidad, asume 1.
+            - Solo devuelve JSON válido sin markdown.
+        `;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        let jsonString = response.text();
+
+        if (jsonString.includes("```json")) {
+            jsonString = jsonString.split("```json")[1].split("```")[0];
+        } else if (jsonString.includes("```")) {
+            jsonString = jsonString.split("```")[1].split("```")[0];
+        }
+
+        return JSON.parse(jsonString.trim());
+    } catch (error) {
+        console.error("Error parsing voice command:", error);
+        return null;
+    }
+}
