@@ -85,7 +85,7 @@ export const budgetData: Dish[] = [
         ingredients: [
             { id: "i4-4", name: "Queso Paria o Huarochiri", quantity: 1, unit: "400 gr", priceUnit: 12.00, priceTotal: 12.00, observations: "HuacaMix", marketPrices: generateMarketPrices(12.00) },
             { id: "i4-5", name: "Carbon de preferencia Briketa", quantity: 1, unit: "5 Kilos", priceUnit: 30.00, priceTotal: 30.00, observations: "Carbon", marketPrices: generateMarketPrices(30.00) },
-            { id: "i4-6", name: "Everest", quantity: 3, unit: "Litros", priceUnit: 6.00, priceTotal: 18.00, observations: "Bebidas / Agua", marketPrices: generateMarketPrices(6.00) },
+            { id: "i4-6", name: "Everest", quantity: 2, unit: "Litros", priceUnit: 6.00, priceTotal: 12.00, observations: "Bebidas / Agua", marketPrices: generateMarketPrices(6.00) },
             { id: "i4-7", name: "Papel Toalla", quantity: 2, unit: "rollos", priceUnit: 3.00, priceTotal: 6.00, marketPrices: generateMarketPrices(3.00) },
             { id: "i4-8", name: "Papa Coctelera", quantity: 2, unit: "Kilos", priceUnit: 6.00, priceTotal: 12.00, marketPrices: generateMarketPrices(6.00) },
         ]
