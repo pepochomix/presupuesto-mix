@@ -62,6 +62,7 @@ export const budgetData: Dish[] = [
             { id: "i2-6", name: "Sal normal y Sal Gruesa", quantity: 2, unit: "Kilos", priceUnit: 7.00, priceTotal: 14.00, marketPrices: generateMarketPrices(7.00) },
             { id: "i2-7", name: "Laurel", quantity: 1, unit: "50 gr", priceUnit: 2.00, priceTotal: 2.00, marketPrices: generateMarketPrices(2.00) },
             { id: "i2-8", name: "Pimienta, Comino Vinagre Balsamico", quantity: 1, unit: "250 gr", priceUnit: 14.00, priceTotal: 14.00, marketPrices: generateMarketPrices(14.00) },
+            { id: "i2-9", name: "Camote Amarillo", quantity: 2, unit: "Kilos", priceUnit: 3.50, priceTotal: 7.00, observations: "Viernes 20% descuento", marketPrices: generateMarketPrices(3.50) },
         ]
     },
     {
@@ -69,7 +70,6 @@ export const budgetData: Dish[] = [
         name: "Insumos Necesarios",
         image: "https://images.unsplash.com/photo-1541592106381-b31e9674c96b?q=80&w=600&auto=format&fit=crop", // Ajo Professional / Kitchen Vibe
         ingredients: [
-            { id: "i3-1", name: "Camote Amarillo", quantity: 3, unit: "Kilos", priceUnit: 3.50, priceTotal: 10.50, observations: "Viernes 20% descuento", marketPrices: generateMarketPrices(3.50) },
             { id: "i3-2", name: "Ajo Toro Chimi Mix con Aceite de Oliva", quantity: 1, unit: "Frasco", priceUnit: 32.00, priceTotal: 32.00, observations: "Costo Para Sazonar Chancho y comer con chorizos etc", marketPrices: generateMarketPrices(32.00) },
             { id: "i3-3", name: "Aceite Primor", quantity: 1, unit: "Litro", priceUnit: 12.00, priceTotal: 12.00, marketPrices: generateMarketPrices(12.00) },
             { id: "i3-4", name: "Clavo de Olor", quantity: 1, unit: "50 gr", priceUnit: 2.50, priceTotal: 2.50, marketPrices: generateMarketPrices(2.50) },
