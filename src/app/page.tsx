@@ -50,16 +50,7 @@ export default function Home() {
           🎶 A CELEBRAR EL BANQUETE MIX 🎶
         </p>
 
-        <p
-          className="mt-1 font-bold uppercase text-xs sm:text-sm md:text-base tracking-widest"
-          style={{
-            color: '#fde68a',
-            textShadow: '0 0 10px #fbbf24, 0 0 20px #f59e0b, 0 0 40px #d97706',
-            animation: 'flicker 1.5s infinite alternate',
-          }}
-        >
-          🥃 CORRIDO · VISTOSO · ILUMINADO 🌟
-        </p>
+
       </div>
 
       {/* Animaciones keyframes inyectadas */}
@@ -68,16 +59,7 @@ export default function Home() {
           0% { background-position: 0% center; }
           100% { background-position: 200% center; }
         }
-        @keyframes flicker {
-          0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-            text-shadow: 0 0 10px #fbbf24, 0 0 20px #f59e0b, 0 0 40px #d97706;
-            opacity: 1;
-          }
-          20%, 24%, 55% {
-            text-shadow: none;
-            opacity: 0.7;
-          }
-        }
+
       `}</style>
 
       <BudgetDashboard />
