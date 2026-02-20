@@ -417,6 +417,26 @@ export default function BudgetDashboard() {
         return participants.filter(p => p.isActive && p.type === 'Adulto').length;
     }, [participants]);
 
+    // ── Gastos de Compra: estado levantado para compartir con KPIs superiores ──
+    // Valores por defecto: Pepocho=201.47, Feny=226.00
+    const buildDefaultGastos = () => {
+        const defaults: Record<string, string> = {};
+        INITIAL_PARTICIPANTS.forEach(p => {
+            if (p.name === 'Pepocho') defaults[p.id] = '201.47';
+            if (p.name === 'Feny') defaults[p.id] = '226.00';
+        });
+        return defaults;
+    };
+    const [gastosPorId, setGastosPorId] = useState<Record<string, string>>(buildDefaultGastos);
+
+    // Total real gastado = suma de los inputs de encargados
+    const gastoRealTotal = useMemo(() => {
+        return Object.values(gastosPorId).reduce((acc, v) => acc + (parseFloat(v) || 0), 0);
+    }, [gastosPorId]);
+
+    // Cuota real por adulto pagante
+    const cuotaReal = activePayingCount > 0 ? gastoRealTotal / activePayingCount : 0;
+
     const activeTotalCount = useMemo(() => {
         return participants.filter(p => p.isActive).length;
     }, [participants]);
@@ -649,16 +669,24 @@ export default function BudgetDashboard() {
                             {/* KPIs Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                                 <KpiCard
-                                    title="Costo Total"
-                                    value={`S/ ${totalCost.toFixed(2)}`}
+                                    title={gastoRealTotal > 0 ? 'Gasto Real de Compras' : 'Costo Presupuestado'}
+                                    value={gastoRealTotal > 0 ? `S/ ${gastoRealTotal.toFixed(2)}` : `S/ ${originalCost.toFixed(2)}`}
                                     icon={<ShoppingCart className="w-6 h-6 text-blue-400" />}
-                                    trend={isOptimized ? `Ahorro: S/ ${savings.toFixed(2)}` : null}
-                                    isPositive={true}
+                                    trend={gastoRealTotal > 0
+                                        ? (originalCost - gastoRealTotal > 0
+                                            ? `💰 Ahorro: S/ ${(originalCost - gastoRealTotal).toFixed(2)}`
+                                            : `⚠️ Exceso: S/ ${Math.abs(originalCost - gastoRealTotal).toFixed(2)}`)
+                                        : (isOptimized ? `Ahorro IA: S/ ${savings.toFixed(2)}` : null)}
+                                    isPositive={gastoRealTotal > 0 ? originalCost >= gastoRealTotal : true}
                                 />
                                 <KpiCard
-                                    title="Costo por Adulto"
-                                    value={activePayingCount > 0 ? `S/ ${(totalCost / activePayingCount).toFixed(2)}` : "N/A"}
-                                    subtitle={`${activePayingCount} Pagantes (${activeTotalCount} Total)`}
+                                    title={gastoRealTotal > 0 ? 'Cuota Real por Adulto' : 'Costo por Adulto'}
+                                    value={activePayingCount > 0
+                                        ? `S/ ${gastoRealTotal > 0 ? cuotaReal.toFixed(2) : (totalCost / activePayingCount).toFixed(2)}`
+                                        : 'N/A'}
+                                    subtitle={gastoRealTotal > 0
+                                        ? `${activePayingCount} Adultos · Real S/ ${gastoRealTotal.toFixed(2)}`
+                                        : `${activePayingCount} Pagantes (${activeTotalCount} Total)`}
                                     icon={<Users className="w-6 h-6 text-purple-400" />}
                                 />
                                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden">
@@ -1083,6 +1111,8 @@ export default function BudgetDashboard() {
                         <PurchaseCostsSection
                             participants={participants}
                             originalCost={originalCost}
+                            gastosPorId={gastosPorId}
+                            setGastosPorId={setGastosPorId}
                         />
 
                         <ParticipantsModal
@@ -2122,9 +2152,13 @@ const PURCHASE_MANAGERS = ['Feny', 'Pepocho'];
 function PurchaseCostsSection({
     participants,
     originalCost,
+    gastosPorId,
+    setGastosPorId,
 }: {
     participants: Participant[];
     originalCost: number;
+    gastosPorId: Record<string, string>;
+    setGastosPorId: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }) {
     // Solo los encargados de compra
     const managers = useMemo(
@@ -2132,8 +2166,7 @@ function PurchaseCostsSection({
         [participants]
     );
 
-    // Un estado de gasto por encargado: { [participantId]: string }
-    const [gastosPorId, setGastosPorId] = useState<Record<string, string>>({});
+    // Helpers: usa el estado compartido desde el padre
 
     const setGasto = (id: string, val: string) =>
         setGastosPorId(prev => ({ ...prev, [id]: val }));
@@ -2146,6 +2179,7 @@ function PurchaseCostsSection({
         () => managers.reduce((acc, m) => acc + (parseFloat(gastosPorId[m.id] || '') || 0), 0),
         [managers, gastosPorId]
     );
+
 
     const hasGastoReal = gastoReal > 0;
 
