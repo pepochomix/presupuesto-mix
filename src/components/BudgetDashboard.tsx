@@ -1121,8 +1121,10 @@ export default function BudgetDashboard() {
                             participants={participants}
                             onToggle={handleToggleParticipant}
                             onTogglePaid={handleTogglePaid}
-                            totalCost={totalCost}
+                            totalCost={gastoRealTotal > 0 ? gastoRealTotal : totalCost}
                             activePayingCount={activePayingCount}
+                            cuotaReal={gastoRealTotal > 0 ? cuotaReal : (activePayingCount > 0 ? totalCost / activePayingCount : 0)}
+                            gastoRealTotal={gastoRealTotal}
                         />
 
                         <CowFundModal
@@ -1646,7 +1648,9 @@ function ParticipantsModal({
     onToggle,
     onTogglePaid,
     totalCost,
-    activePayingCount
+    activePayingCount,
+    cuotaReal,
+    gastoRealTotal,
 }: {
     isOpen: boolean;
     onClose: () => void;
@@ -1655,11 +1659,15 @@ function ParticipantsModal({
     onTogglePaid: (id: string) => void;
     totalCost: number;
     activePayingCount: number;
+    cuotaReal: number;
+    gastoRealTotal: number;
 }) {
     const [mode, setMode] = useState<'manage' | 'collect'>('manage');
     const [showQr, setShowQr] = useState(false);
 
-    const costPerPerson = activePayingCount > 0 ? (totalCost / activePayingCount) : 0;
+    // costPerPerson ahora es la cuota real si hay gasto registrado, si no usa el presupuesto
+    const costPerPerson = cuotaReal;
+    const isRealData = gastoRealTotal > 0;
 
     const generatePaymentLink = (name: string, amount: number) => {
         const message = `Hola ${name}, tu cuota para la comanda es de S/ ${amount.toFixed(2)}. Puedes yapear aquí.`;
@@ -1794,6 +1802,9 @@ function ParticipantsModal({
                                         <p className="text-2xl font-bold text-red-300">
                                             S/ {(participants.filter(p => p.isActive && p.type === 'Adulto' && !p.hasPaid).length * costPerPerson).toFixed(2)}
                                         </p>
+                                        {isRealData && (
+                                            <p className="text-[10px] text-amber-400 mt-1 font-semibold">⚡ Cuota Real</p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -1820,7 +1831,10 @@ function ParticipantsModal({
                                                 <div className="mt-4 p-2 bg-white rounded-xl inline-block">
                                                     <img src="/WhatsApp Image 2026-02-18 at 11.26.49 PM.jpeg" alt="QR Yape Plin" className="w-48 h-auto rounded-lg" />
                                                 </div>
-                                                <p className="text-slate-500 text-xs mt-2">Escanea para pagar S/ {costPerPerson.toFixed(2)}</p>
+                                                <p className="text-slate-500 text-xs mt-2">
+                                                    Escanea para pagar S/ {costPerPerson.toFixed(2)}
+                                                    {isRealData && <span className="text-amber-400 font-bold ml-1">(Cuota Real)</span>}
+                                                </p>
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
@@ -1872,13 +1886,19 @@ function ParticipantsModal({
 
 
                         <div className="p-4 bg-slate-900 border-t border-slate-800 text-center space-y-2">
+                            {isRealData && (
+                                <div className="flex items-center justify-center gap-2 text-xs bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-1.5 mb-2">
+                                    <span className="text-amber-400 font-bold">⚡ Basado en gasto real</span>
+                                    <span className="text-amber-300/70">S/ {gastoRealTotal.toFixed(2)}</span>
+                                </div>
+                            )}
                             <div className="flex justify-between items-center text-sm px-2">
-                                <span className="text-slate-400">Total a Dividir:</span>
+                                <span className="text-slate-400">{isRealData ? 'Total Real Gastado:' : 'Total a Dividir:'}</span>
                                 <span className="text-slate-200 font-bold">S/ {totalCost.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between items-center text-sm px-2">
                                 <span className="text-slate-400">Entre Adultos ({activePayingCount}):</span>
-                                <span className="text-emerald-400 font-bold text-lg">S/ {activePayingCount > 0 ? (totalCost / activePayingCount).toFixed(2) : '0.00'} c/u</span>
+                                <span className="text-emerald-400 font-bold text-lg">S/ {costPerPerson.toFixed(2)} c/u</span>
                             </div>
 
                             <div className="mt-4 pt-3 border-t border-slate-800/50">
