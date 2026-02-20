@@ -2132,27 +2132,34 @@ function PurchaseCostsSection({
         [participants]
     );
 
-    // Estado del gasto real ingresado manualmente
-    const [gastoRealStr, setGastoRealStr] = useState('');
-    const gastoReal = parseFloat(gastoRealStr) || 0;
+    // Un estado de gasto por encargado: { [participantId]: string }
+    const [gastosPorId, setGastosPorId] = useState<Record<string, string>>({});
+
+    const setGasto = (id: string, val: string) =>
+        setGastosPorId(prev => ({ ...prev, [id]: val }));
+
+    const clearGasto = (id: string) =>
+        setGastosPorId(prev => ({ ...prev, [id]: '' }));
+
+    // Total real = suma de todos los inputs válidos
+    const gastoReal = useMemo(
+        () => managers.reduce((acc, m) => acc + (parseFloat(gastosPorId[m.id] || '') || 0), 0),
+        [managers, gastosPorId]
+    );
+
     const hasGastoReal = gastoReal > 0;
 
-    // Derivados del análisis
-    const diferencia = originalCost - gastoReal;           // + ahorro  /  - exceso
+    // ── Análisis ──────────────────────────────────────────────────────────────
+    const diferencia = originalCost - gastoReal;           // positivo = ahorro / negativo = exceso
     const diferenciaPercent = originalCost > 0 ? (Math.abs(diferencia) / originalCost) * 100 : 0;
     const estaAhorro = diferencia > 0.01;
     const estaExceso = diferencia < -0.01;
-    const alDia = !estaAhorro && !estaExceso && hasGastoReal;
-
-    // Reparto equitativo del gasto real entre los 2 encargados
-    const gastoPorEncargado = managers.length > 0 && hasGastoReal
-        ? gastoReal / managers.length
-        : 0;
+    const alDia = hasGastoReal && !estaAhorro && !estaExceso;
 
     return (
         <div className="mt-16 mb-10 max-w-7xl mx-auto px-4">
             <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-amber-500/20 rounded-3xl p-8 relative overflow-hidden shadow-2xl">
-                {/* Top accent bar */}
+                {/* Accent bar */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500" />
                 <div className="absolute -top-16 -right-16 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -2167,131 +2174,121 @@ function PurchaseCostsSection({
                             Gastos de Compra
                         </h2>
                         <p className="text-slate-400 mt-2 text-sm">
-                            Registro de lo que gastaron los encargados de compra vs. lo presupuestado.
+                            Ingresa cuánto gastó cada encargado — el análisis se calcula automáticamente.
                         </p>
                     </div>
-                    <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700 px-4 py-2 rounded-full text-xs text-slate-400 font-semibold">
+                    <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700 px-4 py-2 rounded-full text-xs text-slate-400 font-semibold shrink-0">
                         <UserCheck className="w-4 h-4 text-amber-400" />
                         Encargados: <span className="text-amber-400 ml-1">{PURCHASE_MANAGERS.join(' & ')}</span>
                     </div>
                 </div>
 
-                {/* ── Managers Cards + Gasto Real Input ── */}
-                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                {/* ── Tarjetas de encargados con input individual ── */}
+                <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
+                    {managers.map((p, idx) => {
+                        const val = gastosPorId[p.id] || '';
+                        const numVal = parseFloat(val) || 0;
+                        const hasVal = numVal > 0;
 
-                    {/* Tarjetas de los encargados */}
-                    <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {managers.map((p, idx) => (
+                        return (
                             <motion.div
                                 key={p.id}
-                                initial={{ opacity: 0, y: 10 }}
+                                initial={{ opacity: 0, y: 12 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.08 }}
-                                className="bg-slate-900 border border-amber-500/20 rounded-2xl p-5 flex flex-col gap-3 hover:border-amber-500/50 transition-all"
+                                className="bg-slate-900 border border-amber-500/20 rounded-2xl p-5 flex flex-col gap-4 hover:border-amber-500/40 transition-all"
                             >
+                                {/* Nombre + badge */}
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center text-amber-400 shrink-0">
                                         <UserCheck className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <p className="font-bold text-slate-100 text-base">{p.name}</p>
+                                        <p className="font-bold text-slate-100 text-base leading-tight">{p.name}</p>
                                         <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400">
                                             Encargado de Compra
                                         </span>
                                     </div>
                                 </div>
 
-                                <div className="border-t border-slate-800 pt-3 space-y-1">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-slate-500">Presupuesto (total)</span>
-                                        <span className="text-slate-300 font-mono font-bold">S/ {originalCost.toFixed(2)}</span>
+                                {/* Input del gasto de este encargado */}
+                                <div>
+                                    <p className="text-xs text-slate-500 font-semibold mb-2 uppercase tracking-wider">
+                                        ¿Cuánto gastó?
+                                    </p>
+                                    <div className={`flex items-center gap-2 bg-slate-950 border rounded-xl px-4 py-3 transition-all
+                                        ${val
+                                            ? estaExceso
+                                                ? 'border-red-500/60 ring-1 ring-red-500/20'
+                                                : 'border-emerald-500/50 ring-1 ring-emerald-500/10'
+                                            : 'border-slate-700 focus-within:border-amber-500/70'
+                                        }`}>
+                                        <span className="text-amber-400 font-bold text-base shrink-0">S/</span>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            placeholder="0.00"
+                                            value={val}
+                                            onChange={e => setGasto(p.id, e.target.value)}
+                                            className="bg-transparent border-none outline-none text-slate-100 font-mono text-xl font-bold w-full placeholder:text-slate-700"
+                                        />
+                                        {val && (
+                                            <button
+                                                onClick={() => clearGasto(p.id)}
+                                                className="text-slate-600 hover:text-slate-400 transition-colors shrink-0"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        )}
                                     </div>
-                                    {hasGastoReal && (
-                                        <>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-slate-500">Gasto real total</span>
-                                                <span className={`font-mono font-bold ${estaExceso ? 'text-red-400' : 'text-emerald-400'}`}>
-                                                    S/ {gastoReal.toFixed(2)}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-slate-500">Su parte ({managers.length} encargados)</span>
-                                                <span className="text-amber-400 font-mono font-bold">
-                                                    S/ {gastoPorEncargado.toFixed(2)}
-                                                </span>
-                                            </div>
-                                        </>
-                                    )}
-                                    {!hasGastoReal && (
-                                        <p className="text-xs text-slate-600 italic">Ingresa el gasto real →</p>
+                                </div>
+
+                                {/* Mini resumen de este encargado */}
+                                <div className="border-t border-slate-800 pt-3 space-y-1.5 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-500">Presupuesto total</span>
+                                        <span className="text-slate-400 font-mono font-semibold">S/ {originalCost.toFixed(2)}</span>
+                                    </div>
+                                    {hasVal ? (
+                                        <div className="flex justify-between">
+                                            <span className="text-slate-500">Su gasto</span>
+                                            <span className={`font-mono font-bold ${numVal > originalCost ? 'text-red-400' : 'text-emerald-400'
+                                                }`}>S/ {numVal.toFixed(2)}</span>
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-slate-700 italic">Ingresa el monto arriba ↑</p>
                                     )}
                                 </div>
                             </motion.div>
-                        ))}
+                        );
+                    })}
 
-                        {managers.length === 0 && (
-                            <div className="col-span-2 text-center py-8 border-2 border-dashed border-slate-800 rounded-2xl">
-                                <p className="text-slate-600 text-sm">No se encontraron los encargados en la lista de participantes.</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Input de Gasto Real */}
-                    <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 flex flex-col justify-between gap-4">
-                        <div>
-                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                <Calculator className="w-4 h-4 text-amber-500" />
-                                Total Gastado en Compras
-                            </p>
-                            <p className="text-slate-400 text-xs mb-4 leading-relaxed">
-                                Ingresa aquí el monto <span className="text-amber-400 font-bold">total real</span> gastado en el mercado. El análisis se generará automáticamente.
-                            </p>
+                    {managers.length === 0 && (
+                        <div className="col-span-2 text-center py-8 border-2 border-dashed border-slate-800 rounded-2xl">
+                            <p className="text-slate-600 text-sm">No se encontraron los encargados en la lista de participantes.</p>
                         </div>
-
-                        <div>
-                            <div className={`flex items-center gap-2 bg-slate-950 border rounded-xl px-4 py-3 transition-colors
-                                ${gastoRealStr
-                                    ? estaExceso
-                                        ? 'border-red-500/60 ring-1 ring-red-500/30'
-                                        : 'border-emerald-500/60 ring-1 ring-emerald-500/20'
-                                    : 'border-slate-700 focus-within:border-amber-500'
-                                }`}>
-                                <span className="text-amber-400 font-bold text-lg shrink-0">S/</span>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    placeholder="0.00"
-                                    value={gastoRealStr}
-                                    onChange={e => setGastoRealStr(e.target.value)}
-                                    className="bg-transparent border-none outline-none text-slate-100 font-mono text-2xl font-bold w-full placeholder:text-slate-700"
-                                />
-                                {gastoRealStr && (
-                                    <button
-                                        onClick={() => setGastoRealStr('')}
-                                        className="text-slate-600 hover:text-slate-400 transition-colors shrink-0"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                )}
-                            </div>
-
-                            {hasGastoReal && (
-                                <motion.p
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className={`text-xs mt-2 font-semibold text-center ${estaAhorro ? 'text-emerald-500' : estaExceso ? 'text-red-400' : 'text-slate-500'}`}
-                                >
-                                    {estaAhorro && `✓ S/ ${diferencia.toFixed(2)} bajo el presupuesto`}
-                                    {estaExceso && `⚠ S/ ${Math.abs(diferencia).toFixed(2)} sobre el presupuesto`}
-                                    {alDia && '✓ Exacto al presupuesto'}
-                                </motion.p>
-                            )}
-                        </div>
-                    </div>
+                    )}
                 </div>
 
-                {/* ── Análisis de Ahorro (solo si hay gasto real ingresado) ── */}
+                {/* ── Totalizador ── */}
+                {hasGastoReal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-8 bg-slate-800/50 border border-slate-700 rounded-2xl px-6 py-4"
+                    >
+                        <div className="flex items-center gap-3 text-slate-300 text-sm font-semibold">
+                            <Calculator className="w-4 h-4 text-amber-500" />
+                            Total gastado ({managers.filter(m => (parseFloat(gastosPorId[m.id] || '') || 0) > 0).length} encargado(s) con datos):
+                        </div>
+                        <span className={`font-mono text-2xl font-bold ${estaExceso ? 'text-red-400' : 'text-emerald-400'}`}>
+                            S/ {gastoReal.toFixed(2)}
+                        </span>
+                    </motion.div>
+                )}
+
+                {/* ── Análisis de Ahorro ── */}
                 <div className="relative z-10 border-t border-slate-800 pt-8">
                     <h3 className="text-lg font-bold text-slate-200 mb-6 flex items-center gap-2">
                         <TrendingDown className="w-5 h-5 text-emerald-400" />
@@ -2302,7 +2299,7 @@ function PurchaseCostsSection({
                         <div className="rounded-2xl p-5 border border-dashed border-slate-700 bg-slate-900/50 flex items-center gap-3">
                             <Calculator className="w-5 h-5 text-amber-500/60 shrink-0" />
                             <p className="text-sm text-slate-500">
-                                Ingresa el <span className="text-amber-400 font-bold">gasto real total</span> en el campo de arriba para ver el análisis completo de ahorro.
+                                Ingresa el gasto de al menos un encargado arriba para ver el análisis.
                             </p>
                         </div>
                     ) : (
@@ -2321,39 +2318,41 @@ function PurchaseCostsSection({
                                 </div>
 
                                 {/* Gasto Real */}
-                                <div className={`rounded-2xl p-5 border
-                                    ${estaExceso
-                                        ? 'bg-red-900/20 border-red-500/30'
-                                        : 'bg-emerald-900/20 border-emerald-500/30'}`}>
-                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Gasto Real</p>
+                                <div className={`rounded-2xl p-5 border ${estaExceso ? 'bg-red-900/20 border-red-500/30' : 'bg-emerald-900/20 border-emerald-500/30'
+                                    }`}>
+                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Total Gastado</p>
                                     <p className={`text-3xl font-bold font-mono ${estaExceso ? 'text-red-400' : 'text-emerald-400'}`}>
                                         S/ {gastoReal.toFixed(2)}
                                     </p>
-                                    <p className="text-xs text-slate-500 mt-1">Lo que gastaron en compras</p>
+                                    <p className="text-xs text-slate-500 mt-1">
+                                        Suma: {managers
+                                            .filter(m => (parseFloat(gastosPorId[m.id] || '') || 0) > 0)
+                                            .map(m => `${m.name} S/${(parseFloat(gastosPorId[m.id] || '') || 0).toFixed(0)}`)
+                                            .join(' + ')}
+                                    </p>
                                 </div>
 
                                 {/* Resultado */}
-                                <div className={`rounded-2xl p-5 border
-                                    ${estaAhorro
-                                        ? 'bg-emerald-900/30 border-emerald-400/40 shadow-lg shadow-emerald-500/10'
-                                        : estaExceso
-                                            ? 'bg-red-900/30 border-red-400/40 shadow-lg shadow-red-500/10'
-                                            : 'bg-slate-800/60 border-slate-700'
+                                <div className={`rounded-2xl p-5 border ${estaAhorro
+                                    ? 'bg-emerald-900/30 border-emerald-400/40 shadow-lg shadow-emerald-500/10'
+                                    : estaExceso
+                                        ? 'bg-red-900/30 border-red-400/40 shadow-lg shadow-red-500/10'
+                                        : 'bg-slate-800/60 border-slate-700'
                                     }`}>
                                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                                        {estaAhorro ? '💰 Dinero Ahorrado' : estaExceso ? '⚠️ Exceso de Gasto' : '✅ Balance'}
+                                        {estaAhorro ? '💰 Dinero Ahorrado' : estaExceso ? '⚠️ Exceso' : '✅ Balance'}
                                     </p>
-                                    <p className={`text-3xl font-bold font-mono
-                                        ${estaAhorro ? 'text-emerald-300' : estaExceso ? 'text-red-300' : 'text-slate-300'}`}>
+                                    <p className={`text-3xl font-bold font-mono ${estaAhorro ? 'text-emerald-300' : estaExceso ? 'text-red-300' : 'text-slate-300'
+                                        }`}>
                                         {estaAhorro && '+ '}
                                         {estaExceso && '- '}
                                         S/ {Math.abs(diferencia).toFixed(2)}
                                     </p>
-                                    <p className={`text-xs mt-1 font-semibold
-                                        ${estaAhorro ? 'text-emerald-500' : estaExceso ? 'text-red-400' : 'text-slate-500'}`}>
-                                        {estaAhorro && `${diferenciaPercent.toFixed(1)}% por debajo del presupuesto`}
+                                    <p className={`text-xs mt-1 font-semibold ${estaAhorro ? 'text-emerald-500' : estaExceso ? 'text-red-400' : 'text-slate-500'
+                                        }`}>
+                                        {estaAhorro && `${diferenciaPercent.toFixed(1)}% bajo el presupuesto`}
                                         {estaExceso && `${diferenciaPercent.toFixed(1)}% sobre el presupuesto`}
-                                        {alDia && 'Exacto — ¡perfecto!'}
+                                        {alDia && 'Exacto — ¡gestión perfecta!'}
                                     </p>
                                 </div>
                             </div>
@@ -2362,18 +2361,18 @@ function PurchaseCostsSection({
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                transition={{ delay: 0.2 }}
-                                className={`rounded-2xl p-5 border flex items-start gap-4
-                                    ${estaAhorro
-                                        ? 'bg-emerald-950/40 border-emerald-500/30'
-                                        : estaExceso
-                                            ? 'bg-red-950/40 border-red-500/30'
-                                            : 'bg-slate-800/50 border-slate-700'}`}
+                                transition={{ delay: 0.15 }}
+                                className={`rounded-2xl p-5 border flex items-start gap-4 ${estaAhorro
+                                    ? 'bg-emerald-950/40 border-emerald-500/30'
+                                    : estaExceso
+                                        ? 'bg-red-950/40 border-red-500/30'
+                                        : 'bg-slate-800/50 border-slate-700'
+                                    }`}
                             >
-                                <div className={`shrink-0 p-2 rounded-xl
-                                    ${estaAhorro ? 'bg-emerald-500/20 text-emerald-400'
-                                        : estaExceso ? 'bg-red-500/20 text-red-400'
-                                            : 'bg-slate-700 text-slate-400'}`}>
+                                <div className={`shrink-0 p-2 rounded-xl ${estaAhorro ? 'bg-emerald-500/20 text-emerald-400'
+                                    : estaExceso ? 'bg-red-500/20 text-red-400'
+                                        : 'bg-slate-700 text-slate-400'
+                                    }`}>
                                     {estaAhorro ? <TrendingDown className="w-6 h-6" />
                                         : estaExceso ? <TrendingUp className="w-6 h-6" />
                                             : <CheckCircle2 className="w-6 h-6" />}
@@ -2382,33 +2381,28 @@ function PurchaseCostsSection({
                                     <p className="font-bold text-slate-100 mb-1">
                                         {estaAhorro && '🎉 ¡Compraron por debajo del presupuesto!'}
                                         {estaExceso && '⚠️ El gasto superó el presupuesto'}
-                                        {alDia && '✅ Gasto exactamente al presupuesto'}
+                                        {alDia && '✅ Exactamente al presupuesto'}
                                     </p>
                                     <p className="text-slate-400 text-sm leading-relaxed">
-                                        {estaAhorro && (
-                                            <>
-                                                <span className="font-bold text-amber-400">{managers.map(m => m.name).join(' y ')}</span> gastaron{' '}
-                                                <span className="text-emerald-300 font-bold font-mono">S/ {gastoReal.toFixed(2)}</span> de un presupuesto de{' '}
-                                                <span className="font-bold font-mono text-slate-200">S/ {originalCost.toFixed(2)}</span>.{' '}
-                                                Se ahorraron <span className="text-emerald-300 font-bold font-mono">S/ {diferencia.toFixed(2)}</span>{' '}
-                                                ({diferenciaPercent.toFixed(1)}% del total).
-                                            </>
-                                        )}
-                                        {estaExceso && (
-                                            <>
-                                                <span className="font-bold text-amber-400">{managers.map(m => m.name).join(' y ')}</span> gastaron{' '}
-                                                <span className="text-red-300 font-bold font-mono">S/ {gastoReal.toFixed(2)}</span>, superando el presupuesto de{' '}
-                                                <span className="font-bold font-mono text-slate-200">S/ {originalCost.toFixed(2)}</span>{' '}
-                                                por <span className="text-red-300 font-bold font-mono">S/ {Math.abs(diferencia).toFixed(2)}</span>{' '}
-                                                ({diferenciaPercent.toFixed(1)}% extra).
-                                            </>
-                                        )}
-                                        {alDia && (
-                                            <>
-                                                <span className="font-bold text-amber-400">{managers.map(m => m.name).join(' y ')}</span> gastaron exactamente{' '}
-                                                <span className="font-bold font-mono text-slate-200">S/ {gastoReal.toFixed(2)}</span>, igual al presupuesto. ¡Gestión perfecta!
-                                            </>
-                                        )}
+                                        {estaAhorro && (<>
+                                            <span className="font-bold text-amber-400">{managers.map(m => m.name).join(' y ')}</span>{' '}
+                                            gastaron en total <span className="text-emerald-300 font-bold font-mono">S/ {gastoReal.toFixed(2)}</span>{' '}
+                                            de un presupuesto de <span className="font-bold font-mono text-slate-200">S/ {originalCost.toFixed(2)}</span>.{' '}
+                                            Se ahorraron <span className="text-emerald-300 font-bold font-mono">S/ {diferencia.toFixed(2)}</span>{' '}
+                                            ({diferenciaPercent.toFixed(1)}&#37; del total).
+                                        </>)}
+                                        {estaExceso && (<>
+                                            <span className="font-bold text-amber-400">{managers.map(m => m.name).join(' y ')}</span>{' '}
+                                            gastaron <span className="text-red-300 font-bold font-mono">S/ {gastoReal.toFixed(2)}</span>,{' '}
+                                            superando el presupuesto de <span className="font-bold font-mono text-slate-200">S/ {originalCost.toFixed(2)}</span>{' '}
+                                            por <span className="text-red-300 font-bold font-mono">S/ {Math.abs(diferencia).toFixed(2)}</span>{' '}
+                                            ({diferenciaPercent.toFixed(1)}&#37; extra).
+                                        </>)}
+                                        {alDia && (<>
+                                            <span className="font-bold text-amber-400">{managers.map(m => m.name).join(' y ')}</span>{' '}
+                                            gastaron exactamente <span className="font-bold font-mono text-slate-200">S/ {gastoReal.toFixed(2)}</span>,{' '}
+                                            igual al presupuesto. ¡Gestión impecable!
+                                        </>)}
                                     </p>
                                 </div>
                             </motion.div>
