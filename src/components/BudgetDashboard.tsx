@@ -1077,6 +1077,18 @@ export default function BudgetDashboard() {
                             </div>
                         </div>
 
+                        {/* ╔════════════════════════════════════════╗ */}
+                        {/* ║       GASTOS DE COMPRA SECTION         ║ */}
+                        {/* ╚════════════════════════════════════════╝ */}
+                        <PurchaseCostsSection
+                            participants={participants}
+                            totalCost={totalCost}
+                            originalCost={originalCost}
+                            savings={savings}
+                            isOptimized={isOptimized}
+                            activePayingCount={activePayingCount}
+                        />
+
                         <ParticipantsModal
                             isOpen={showParticipantsModal}
                             onClose={() => setShowParticipantsModal(false)}
@@ -2102,6 +2114,272 @@ function SeasonalityAlerts() {
                         </div>
                     </div>
                 ))}
+            </div>
+        </div>
+    );
+}
+
+// ─── GASTOS DE COMPRA ───────────────────────────────────────────────────────
+function PurchaseCostsSection({
+    participants,
+    totalCost,
+    originalCost,
+    savings,
+    isOptimized,
+    activePayingCount,
+}: {
+    participants: Participant[];
+    totalCost: number;
+    originalCost: number;
+    savings: number;
+    isOptimized: boolean;
+    activePayingCount: number;
+}) {
+    const [filter, setFilter] = useState<'todos' | 'activos' | 'inactivos'>('activos');
+
+    const filteredParticipants = useMemo(() => {
+        if (filter === 'activos') return participants.filter(p => p.isActive);
+        if (filter === 'inactivos') return participants.filter(p => !p.isActive);
+        return participants;
+    }, [participants, filter]);
+
+    const payingInFilter = filteredParticipants.filter(p => p.type === 'Adulto').length;
+    const costPerAdult = activePayingCount > 0 ? originalCost / activePayingCount : 0;
+    const optimizedCostPerAdult = activePayingCount > 0 ? totalCost / activePayingCount : 0;
+    const savingsPercent = originalCost > 0 ? (savings / originalCost) * 100 : 0;
+    const hasSavings = savings > 0.01;
+
+    return (
+        <div className="mt-16 mb-10 max-w-7xl mx-auto px-4">
+            <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-amber-500/20 rounded-3xl p-8 relative overflow-hidden shadow-2xl">
+                {/* Top accent bar */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500" />
+                {/* Decorative blobs */}
+                <div className="absolute -top-16 -right-16 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                {/* ── Header ── */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 relative z-10">
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
+                            <span className="bg-amber-500/20 text-amber-400 p-2 rounded-lg">
+                                <ShoppingCart className="w-6 h-6" />
+                            </span>
+                            Gastos de Compra
+                        </h2>
+                        <p className="text-slate-400 mt-2 text-sm max-w-xl">
+                            Distribución del gasto total por participante según el presupuesto actual. Selecciona qué grupo ver.
+                        </p>
+                    </div>
+
+                    {/* Dropdown filtro */}
+                    <div className="relative">
+                        <select
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value as 'todos' | 'activos' | 'inactivos')}
+                            className="appearance-none bg-slate-800 border border-slate-700 hover:border-amber-500 text-slate-200 font-bold rounded-xl px-5 py-2.5 pr-10 outline-none focus:border-amber-500 transition-colors cursor-pointer shadow-lg text-sm"
+                        >
+                            <option value="activos">✅ Solo Activos</option>
+                            <option value="inactivos">❌ Solo Inactivos</option>
+                            <option value="todos">👥 Todos</option>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500 pointer-events-none" />
+                    </div>
+                </div>
+
+                {/* ── Participant Cost Grid ── */}
+                <div className="relative z-10 mb-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                        {filteredParticipants.map((p, idx) => {
+                            const isAdult = p.type === 'Adulto';
+                            const gasto = isAdult && activePayingCount > 0
+                                ? originalCost / activePayingCount
+                                : 0;
+                            const gastoOptimizado = isAdult && activePayingCount > 0
+                                ? totalCost / activePayingCount
+                                : 0;
+                            const ahorroPersonal = gasto - gastoOptimizado;
+
+                            return (
+                                <motion.div
+                                    key={p.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.04 }}
+                                    className={`flex items-center justify-between p-4 rounded-xl border transition-all group
+                                        ${p.isActive
+                                            ? 'bg-slate-900/80 border-slate-800 hover:border-amber-500/40'
+                                            : 'bg-slate-950/50 border-slate-800/40 opacity-60 hover:opacity-80'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center border-2
+                                            ${p.isActive ? 'bg-amber-500/20 border-amber-500/50 text-amber-400' : 'bg-slate-800 border-slate-700 text-slate-500'}`}>
+                                            {p.type === 'Adulto'
+                                                ? <User className="w-4 h-4" />
+                                                : <Baby className="w-4 h-4" />
+                                            }
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="font-semibold text-slate-200 text-sm truncate">{p.name}</p>
+                                            <div className="flex items-center gap-1.5 mt-0.5">
+                                                <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full
+                                                    ${p.type === 'Adulto' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                                                    {p.type}
+                                                </span>
+                                                {!p.isActive && (
+                                                    <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-slate-700 text-slate-500">
+                                                        Inactivo
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="text-right shrink-0 ml-2">
+                                        {isAdult ? (
+                                            <>
+                                                <p className="font-bold text-slate-100 font-mono text-base">
+                                                    S/ {gasto.toFixed(2)}
+                                                </p>
+                                                {isOptimized && hasSavings && (
+                                                    <p className="text-[11px] text-emerald-400 font-mono mt-0.5">
+                                                        Opt: S/ {gastoOptimizado.toFixed(2)}
+                                                    </p>
+                                                )}
+                                                {isOptimized && hasSavings && ahorroPersonal > 0 && (
+                                                    <p className="text-[10px] text-emerald-500 mt-0.5">
+                                                        ✓ ahorra S/ {ahorroPersonal.toFixed(2)}
+                                                    </p>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <p className="text-sm text-slate-500 font-medium italic">Invitado</p>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
+                    </div>
+
+                    {filteredParticipants.length === 0 && (
+                        <div className="text-center py-10 border-2 border-dashed border-slate-800 rounded-2xl">
+                            <p className="text-slate-600">No hay participantes en este grupo.</p>
+                        </div>
+                    )}
+
+                    {payingInFilter > 0 && (
+                        <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-end items-center text-sm text-slate-400 border-t border-slate-800 pt-4">
+                            <span>
+                                <span className="text-slate-300 font-bold">{payingInFilter}</span> adulto(s) en esta vista ×{' '}
+                                <span className="font-mono text-amber-400 font-bold">S/ {costPerAdult.toFixed(2)}</span>
+                                {' '}= Total Presupuestado
+                            </span>
+                            <span className="text-slate-700 hidden sm:block">|</span>
+                            <span className="font-bold text-slate-200 font-mono">
+                                S/ {(payingInFilter * costPerAdult).toFixed(2)}
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                {/* ── Análisis de Ahorro ── */}
+                <div className="relative z-10 border-t border-slate-800 pt-8">
+                    <h3 className="text-lg font-bold text-slate-200 mb-6 flex items-center gap-2">
+                        <TrendingDown className="w-5 h-5 text-emerald-400" />
+                        Análisis de Costo Real vs. Presupuestado
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        {/* Presupuestado */}
+                        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 flex flex-col gap-1">
+                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Costo Presupuestado</p>
+                            <p className="text-3xl font-bold text-slate-100 font-mono">S/ {originalCost.toFixed(2)}</p>
+                            <p className="text-xs text-slate-500 mt-1">
+                                S/ {costPerAdult.toFixed(2)} / adulto ({activePayingCount} pagantes)
+                            </p>
+                        </div>
+
+                        {/* Costo Real */}
+                        <div className={`rounded-2xl p-5 flex flex-col gap-1 border
+                            ${isOptimized && hasSavings
+                                ? 'bg-emerald-900/20 border-emerald-500/30'
+                                : 'bg-slate-800/60 border-slate-700'}`}>
+                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Costo Real (IA Optimizado)</p>
+                            <p className={`text-3xl font-bold font-mono ${isOptimized && hasSavings ? 'text-emerald-400' : 'text-slate-400'}`}>
+                                {isOptimized ? `S/ ${totalCost.toFixed(2)}` : '—'}
+                            </p>
+                            <p className="text-xs text-slate-500 mt-1">
+                                {isOptimized
+                                    ? `S/ ${optimizedCostPerAdult.toFixed(2)} / adulto`
+                                    : 'Activa "Optimizar con IA" para ver'}
+                            </p>
+                        </div>
+
+                        {/* Ahorro */}
+                        <div className={`rounded-2xl p-5 flex flex-col gap-1 border
+                            ${isOptimized && hasSavings
+                                ? 'bg-emerald-900/30 border-emerald-400/40 shadow-lg shadow-emerald-500/10'
+                                : 'bg-slate-800/60 border-slate-700'}`}>
+                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">💰 Dinero Ahorrado</p>
+                            <p className={`text-3xl font-bold font-mono ${isOptimized && hasSavings ? 'text-emerald-300' : 'text-slate-600'}`}>
+                                {isOptimized ? `S/ ${savings.toFixed(2)}` : 'S/ —'}
+                            </p>
+                            <p className={`text-xs mt-1 font-semibold ${isOptimized && hasSavings ? 'text-emerald-500' : 'text-slate-600'}`}>
+                                {isOptimized && hasSavings
+                                    ? `${savingsPercent.toFixed(1)}% menos que el presupuesto`
+                                    : 'Sin optimización activa'}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Análisis narrativo */}
+                    {isOptimized && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`rounded-2xl p-5 border ${hasSavings
+                                ? 'bg-emerald-950/40 border-emerald-500/30'
+                                : 'bg-slate-800/50 border-slate-700'}`}
+                        >
+                            <div className="flex items-start gap-4">
+                                <div className={`shrink-0 p-2 rounded-xl ${hasSavings ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-400'}`}>
+                                    {hasSavings ? <TrendingDown className="w-6 h-6" /> : <TrendingUp className="w-6 h-6" />}
+                                </div>
+                                <div>
+                                    <p className="font-bold text-slate-100 mb-1">
+                                        {hasSavings ? '🎉 ¡Hay oportunidad de ahorro real!' : 'Precios ya están optimizados'}
+                                    </p>
+                                    <p className="text-slate-400 text-sm leading-relaxed">
+                                        {hasSavings ? (
+                                            <>
+                                                Si compras en los mercados recomendados por la IA, el grupo puede ahorrar{' '}
+                                                <span className="text-emerald-300 font-bold font-mono">S/ {savings.toFixed(2)}</span>
+                                                {' '}en total — equivalente a{' '}
+                                                <span className="text-emerald-300 font-bold font-mono">S/ {(savings / (activePayingCount || 1)).toFixed(2)}</span>
+                                                {' '}menos por persona pagante. Eso representa el{' '}
+                                                <span className="text-emerald-300 font-bold">{savingsPercent.toFixed(1)}%</span>
+                                                {' '}del presupuesto total de{' '}
+                                                <span className="font-bold text-slate-200 font-mono">S/ {originalCost.toFixed(2)}</span>.
+                                            </>
+                                        ) : (
+                                            'El presupuesto actual ya refleja los mejores precios disponibles en los mercados locales.'
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {!isOptimized && (
+                        <div className="rounded-2xl p-4 border border-slate-800 bg-slate-900/50 flex items-center gap-3">
+                            <Sparkles className="w-5 h-5 text-amber-500 shrink-0" />
+                            <p className="text-sm text-slate-400">
+                                Activa <span className="text-amber-400 font-bold">"Optimizar con IA"</span> en la parte superior para ver el análisis completo de ahorro y los costos reales por mercado.
+                            </p>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
